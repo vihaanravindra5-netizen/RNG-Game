@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101611">
+  <title>ODDITY — roll your luck</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      color-scheme: dark;
+      --ink: #edf0dd;
+      --muted: #929b8d;
+      --page: #101611;
+      --panel: #19221b;
+      --panel-light: #202b22;
+      --line: #344035;
+      --lime: #cefa68;
+      --mint: #86e2b1;
+      --coral: #ff846c;
+      --gold: #ffcf6e;
+      --mono: "DM Mono", monospace;
+      --sans: "Space Grotesk", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      background-image: radial-gradient(ellipse at 52% 37%, #263328 0, transparent 53%),
+        repeating-linear-gradient(0deg, transparent, transparent 47px, #ffffff05 48px),
+        repeating-linear-gradient(90deg, transparent, transparent 47px, #ffffff05 48px);
+      font-family: var(--sans);
+    }
+
+    button { color: inherit; font: inherit; }
+    .shell { width: min(1040px, calc(100% - 36px)); margin: 0 auto; padding: 30px 0 36px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--lime); color: var(--lime); font-size: 19px; transform: rotate(-8deg); }
+    .brand-name { font-size: 17px; font-weight: 700; letter-spacing: 0; }
+    .brand-tag { margin-top: 2px; color: var(--muted); font: 10px var(--mono); letter-spacing: 0; }
+    .top-stats { display: flex; align-items: center; gap: 28px; }
+    .top-stat { display: grid; gap: 4px; text-align: right; }
+    .eyebrow { color: var(--muted); font: 10px var(--mono); text-transform: uppercase; letter-spacing: 0; }
+    .top-stat strong { font: 500 15px var(--mono); }
+    .shard-count { color: var(--gold); }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; padding-top: 24px; align-items: start; }
+    .main-column { min-width: 0; display: grid; gap: 16px; }
+    .panel { border: 1px solid var(--line); background: #182119eF; }
+    .machine { position: relative; min-height: 426px; overflow: hidden; padding: 22px 24px 25px; text-align: center; }
+    .machine::before, .machine::after { position: absolute; width: 13px; height: 13px; content: ""; pointer-events: none; }
+    .machine::before { top: 9px; left: 9px; border-top: 1px solid var(--lime); border-left: 1px solid var(--lime); }
+    .machine::after { right: 9px; bottom: 9px; border-right: 1px solid var(--lime); border-bottom: 1px solid var(--lime); }
+    .machine-label { display: flex; justify-content: space-between; color: var(--muted); font: 10px var(--mono); text-transform: uppercase; }
+    .machine-label span:last-child { color: var(--mint); }
+    .number-stage { position: relative; display: grid; place-items: center; height: 224px; margin: 11px 0 4px; isolation: isolate; }
+    .number-stage.animations-off::after { animation: none; }
+    .number-stage.animations-off .result-number { animation: none !important; }
+    .number-stage::before { position: absolute; z-index: -1; width: 200px; aspect-ratio: 1; border: 1px solid #b7d28b1d; border-radius: 50%; content: ""; }
+    .number-stage::after { position: absolute; z-index: -1; width: 250px; aspect-ratio: 1; border: 1px dashed #b7d28b12; border-radius: 50%; content: ""; animation: orbit 42s linear infinite; }
+    .result-number { display: block; min-width: 200px; color: var(--lime); font-size: clamp(72px, 16vw, 132px); font-weight: 700; line-height: .9; font-variant-numeric: tabular-nums; text-shadow: 0 0 32px #cefa6830; transition: color .2s, text-shadow .2s; }
+    .result-number.rolling { animation: roll .52s cubic-bezier(.2,.7,.2,1); }
+    .result-number.jackpot { color: var(--gold); text-shadow: 0 0 20px #ffcf6e99, 0 0 70px #ffcf6e55; }
+    .result-number.hex { color: var(--coral); text-shadow: 0 0 22px #ff846c99; }
+    .result-number.cosmic { color: #91e4d4; text-shadow: 0 0 25px #91e4d488, 0 0 72px #91e4d455; }
+    .result-number.perfect { color: #fff5bf; text-shadow: 0 0 30px #ffcf6e, 0 0 85px #ff846caa; animation: oneHundred .95s cubic-bezier(.15,.75,.2,1); }
+    .result-number.mystery { color: #cfb9ff; text-shadow: 0 0 24px #cfb9ff99; }
+    .result-number.passive-seven { animation: sevenSpark .9s cubic-bezier(.18,.8,.25,1); }
+    .result-number.passive-thirteen { animation: hexFlicker .65s steps(2,end); }
+    .result-number.passive-forty-two { animation: cosmicPulse 1.1s ease-out; }
+    .result-number.passive-sixty-nine { animation: doubleBounce .8s ease-in-out; }
+    .result-number.passive-hundred { animation: supernova 1.25s cubic-bezier(.15,.75,.2,1); }
+    .result-caption { min-height: 24px; color: var(--muted); font: 11px var(--mono); }
+    .result-caption.special { color: var(--gold); }
+    .roll-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: min(100%, 290px); min-height: 52px; margin-top: 11px; border: 0; background: var(--lime); color: #182018; cursor: pointer; font-size: 14px; font-weight: 700; transition: background .18s, transform .18s; }
+    .roll-button:hover:not(:disabled) { background: #e0ff9c; transform: translateY(-2px); }
+    .roll-button:active:not(:disabled) { transform: translateY(0); }
+    .roll-button:disabled { cursor: wait; opacity: .72; }
+    .roll-button kbd { padding: 3px 6px; border: 1px solid #1820184d; font: 10px var(--mono); }
+    .roll-subtext { margin-top: 9px; color: var(--muted); font: 10px var(--mono); }
+
+    .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .stat-cell { min-width: 0; padding: 15px 18px; }
+    .stat-cell + .stat-cell { border-left: 1px solid var(--line); }
+    .stat-cell strong { display: block; margin-top: 8px; overflow: hidden; font: 500 18px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+    .stat-cell:nth-child(2) strong { color: var(--mint); }
+    .stat-cell:nth-child(3) strong { color: var(--gold); }
+
+    .side-column { display: grid; gap: 16px; }
+    .side-panel { padding: 17px; }
+    .section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid var(--line); }
+    .section-heading h2 { margin: 0; font-size: 14px; font-weight: 600; }
+    .section-heading span { color: var(--muted); font: 10px var(--mono); }
+    .upgrade-list { display: grid; gap: 9px; padding-top: 12px; }
+    .upgrade { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 9px; border: 1px solid #344035; background: #1c261e; }
+    .upgrade-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #566249; color: var(--lime); font: 15px var(--mono); }
+    .upgrade:nth-child(2) .upgrade-icon { color: var(--mint); border-color: #486c57; }
+    .upgrade:nth-child(3) .upgrade-icon { color: var(--coral); border-color: #765047; }
+    .upgrade:nth-child(4) .upgrade-icon { color: var(--gold); border-color: #766745; }
+    .upgrade-copy { min-width: 0; }
+    .upgrade-copy strong { display: block; font-size: 12px; font-weight: 600; }
+    .upgrade-copy span { display: block; margin-top: 4px; color: var(--muted); font: 9px var(--mono); line-height: 1.5; }
+    .buy-button { min-width: 64px; padding: 7px 6px; border: 1px solid #64754d; background: transparent; color: var(--lime); cursor: pointer; font: 10px var(--mono); }
+    .buy-button:hover:not(:disabled) { background: #cefa6814; }
+    .buy-button:disabled { border-color: var(--line); color: #737c70; cursor: not-allowed; }
+    .pet-list, .material-list { display: grid; gap: 8px; padding-top: 12px; }
+    .pet-card { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 9px 8px; border: 1px solid var(--line); background: #1c261e; }
+    .pet-mark { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #566249; color: var(--mint); font-size: 16px; }
+    .pet-card:nth-child(2) .pet-mark { color: var(--gold); }
+    .pet-card:nth-child(3) .pet-mark { color: #8bd9e1; }
+    .pet-card:nth-child(4) .pet-mark { color: #ffad84; }
+    .pet-card:nth-child(5) .pet-mark, .pet-card:nth-child(9) .pet-mark { color: #d0b6ff; }
+    .pet-card:nth-child(6) .pet-mark, .pet-card:nth-child(10) .pet-mark { color: var(--coral); }
+    .pet-card:nth-child(7) .pet-mark, .pet-card:nth-child(11) .pet-mark { color: var(--gold); }
+    .pet-card:nth-child(8) .pet-mark, .pet-card:nth-child(12) .pet-mark { color: #91e4d4; }
+    .pet-copy { min-width: 0; }
+    .pet-copy strong, .pet-copy span { display: block; }
+    .pet-copy strong { font-size: 11px; }
+    .pet-copy span { margin-top: 4px; color: var(--muted); font: 9px/1.4 var(--mono); }
+    .pet-button { min-width: 65px; padding: 7px 5px; border: 1px solid #64754d; background: transparent; color: var(--lime); cursor: pointer; font: 9px var(--mono); }
+    .pet-button:disabled { border-color: var(--line); color: #737c70; cursor: not-allowed; }
+    .pet-button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+    .loadout-summary { margin-top: 11px; padding: 9px; border-left: 2px solid var(--mint); background: #86e2b10a; color: #c6d3c2; font: 9px/1.6 var(--mono); }
+    .gacha-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .gacha-button { min-height: 38px; padding: 6px; border: 1px solid #64754d; background: #cefa680c; color: var(--lime); cursor: pointer; font: 9px var(--mono); }
+    .gacha-button:hover:not(:disabled) { background: #cefa681e; }
+    .gacha-button:disabled { border-color: var(--line); color: #737c70; cursor: not-allowed; }
+    .offer-card { margin-top: 12px; padding: 12px; border: 1px solid var(--gold); background: #ffcf6e0a; }
+    .offer-card[hidden] { display: none; }
+    .offer-label { color: var(--gold); font: 9px var(--mono); }
+    .offer-card h3 { margin: 7px 0 4px; font-size: 15px; }
+    .offer-stats { color: #c6d3c2; font: 9px/1.6 var(--mono); }
+    .offer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .offer-actions button { min-height: 34px; border: 1px solid var(--gold); background: #ffcf6e12; color: var(--gold); cursor: pointer; font: 9px var(--mono); }
+    .offer-actions button:disabled { border-color: var(--line); color: #737c70; cursor: not-allowed; }
+    .material-summary { padding-top: 12px; color: #bdc5b4; font: 10px/1.5 var(--mono); }
+    .material-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 9px 8px; border: 1px solid var(--line); background: #1c261e; }
+    .material-item strong, .material-item span { display: block; }
+    .material-item strong { font-size: 11px; }
+    .material-item span { margin-top: 4px; color: var(--muted); font: 9px var(--mono); }
+    .material-item .buy-button { min-width: 72px; font-size: 9px; }
+
+    .rebirth-panel { border-color: #65583d; background: linear-gradient(135deg, #28291d, #1d231c); }
+    .rebirth-panel .section-heading { border-color: #544b36; }
+    .rebirth-panel .section-heading span { color: var(--gold); }
+    .rebirth-copy { padding: 12px 0; color: #b7bba9; font-size: 11px; line-height: 1.55; }
+    .rebirth-copy strong { color: var(--gold); font-family: var(--mono); font-weight: 500; }
+    .progress-track { height: 4px; overflow: hidden; background: #494733; }
+    .progress-fill { width: 0; height: 100%; background: var(--gold); transition: width .3s; }
+    .rebirth-bottom { display: flex; justify-content: space-between; gap: 10px; margin: 8px 0 12px; color: var(--muted); font: 9px var(--mono); }
+    .rebirth-button { width: 100%; min-height: 38px; border: 1px solid #8c7549; background: #ffcf6e12; color: var(--gold); cursor: pointer; font: 11px var(--mono); }
+    .rebirth-button:hover:not(:disabled) { background: #ffcf6e24; }
+    .rebirth-button:disabled { border-color: #4a4838; color: #817d69; cursor: not-allowed; }
+
+    .history-panel { padding: 16px 18px; }
+    .history-list { display: flex; flex-wrap: wrap; gap: 7px; min-height: 34px; padding-top: 12px; }
+    .history-item { display: grid; place-items: center; width: 34px; height: 30px; border: 1px solid var(--line); color: #bdc5b4; font: 11px var(--mono); }
+    .history-item.special { border-color: #7e7147; color: var(--gold); background: #ffcf6e0a; }
+    .history-empty { align-self: center; color: var(--muted); font: 10px var(--mono); }
+    .index-panel { padding: 16px 18px; }
+    .rarity-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding-top: 12px; }
+    .rarity-card { min-width: 0; padding: 10px 8px; border: 1px solid var(--line); background: #1c261e; }
+    .rarity-card strong, .rarity-card span, .rarity-card p { display: block; margin: 0; }
+    .rarity-card strong { font-size: 10px; }
+    .rarity-card span { margin-top: 6px; color: var(--muted); font: 9px var(--mono); }
+    .rarity-card p { margin-top: 9px; color: #bdc5b4; font-size: 10px; line-height: 1.4; }
+    .rarity-card.common strong { color: #bdc5b4; }
+    .rarity-card.uncommon strong { color: var(--mint); }
+    .rarity-card.rare strong { color: #8bd9e1; }
+    .rarity-card.epic strong { color: #d0b6ff; }
+    .rarity-card.legendary strong { color: var(--coral); }
+    .rarity-card.mythic strong { color: #d0b6ff; }
+    .rarity-card.celestial strong { color: var(--mint); }
+    .rarity-card.divine strong { color: var(--gold); }
+    .oddity-list { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .oddity-list p { flex: 1 1 420px; margin: 0; color: #bdc5b4; font: 10px/1.8 var(--mono); }
+    .oddity-list strong { color: var(--gold); font-weight: 500; }
+    .animation-library { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .animation-heading { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font: 9px var(--mono); }
+    .preview-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .preview-button { display: block; padding: 7px 10px; border: 1px solid #9b7941; background: #ffcf6e12; color: var(--gold); cursor: pointer; font: 9px var(--mono); }
+    .preview-button:hover:not(:disabled) { background: #ffcf6e24; }
+    .preview-button:disabled { border-color: var(--line); color: #737c70; cursor: not-allowed; }
+    .animation-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 9px; }
+    .animation-item { min-width: 0; padding: 9px 8px; border: 1px solid var(--line); background: #1c261e; }
+    .animation-item strong, .animation-item span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .animation-item strong { color: var(--ink); font-size: 10px; }
+    .animation-item span { margin-top: 4px; color: var(--muted); font: 9px var(--mono); }
+    .animation-button { width: 100%; margin-top: 8px; padding: 6px 4px; border: 1px solid #64754d; background: transparent; color: var(--lime); cursor: pointer; font: 9px var(--mono); }
+    .animation-button:disabled { border-color: var(--line); color: #737c70; cursor: not-allowed; }
+    .animation-button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+    .settings-panel { padding: 17px; }
+    .setting-row { display: flex; align-items: center; gap: 11px; margin-top: 14px; cursor: pointer; }
+    .setting-row input { width: 17px; height: 17px; margin: 0; accent-color: var(--lime); }
+    .setting-row strong, .setting-row small { display: block; }
+    .setting-row strong { font-size: 12px; }
+    .setting-row small { margin-top: 4px; color: var(--muted); font: 9px/1.5 var(--mono); }
+    .screen-event { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; overflow: hidden; padding: 24px; background: #010203; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .12s, visibility .12s; }
+    .screen-event.active { opacity: 1; visibility: visible; pointer-events: auto; }
+    .screen-event::before { position: absolute; z-index: 0; inset: -55%; background: repeating-conic-gradient(from 7deg, transparent 0 8deg, #ffffff12 8.3deg 9deg, transparent 9.3deg 17deg); content: ""; opacity: .38; animation: eventRays 9s linear infinite; }
+    .screen-event.active::after { position: absolute; z-index: 3; inset: 0; background: #fff; content: ""; opacity: 0; pointer-events: none; animation: cutFlash .38s steps(2,end) both; }
+    .screen-event.event-7 { --event-accent: #ffcf6e; background: radial-gradient(ellipse at 50% 47%, #261b09 0, #080807 28%, #010203 72%); }
+    .screen-event.event-13 { --event-accent: #ff6a58; background: radial-gradient(ellipse at 50% 47%, #280b0a 0, #090505 29%, #010203 72%); }
+    .screen-event.event-42 { --event-accent: #84e6d2; background: radial-gradient(ellipse at 50% 47%, #09221f 0, #050908 30%, #010203 72%); }
+    .screen-event.event-69 { --event-accent: #ff83be; background: radial-gradient(ellipse at 50% 47%, #260817 0, #0b0509 30%, #010203 72%); }
+    .screen-event.event-100, .screen-event.event-777, .screen-event.event-1000 { --event-accent: #ffe7a0; background: radial-gradient(ellipse at 50% 47%, #30200a 0, #0b0804 29%, #010203 72%); }
+    .screen-event.event-777 { --event-accent: #ffd447; background: radial-gradient(ellipse at 50% 47%, #493406 0, #120d03 29%, #010203 72%); }
+    .screen-event.event-777 .event-title, .screen-event.event-777 .event-kicker { color: #ffdc57; text-shadow: 0 0 18px #ffbf24, 0 0 42px #ffbf2480; }
+    .screen-event.event-777 .slot-machine { border-color: #ffd447; background: linear-gradient(145deg, #3c2c08, #070600 72%); box-shadow: 0 0 100px #ffd44788, inset 0 0 42px #ffd4472b; }
+    .screen-event.event-777 .slot-brand, .screen-event.event-777 .slot-footer { color: #ffdc57; text-shadow: 0 0 12px #ffbf24; }
+    .screen-event.event-777 .slot-reels { border-color: #ffe67b; box-shadow: 0 0 35px #ffdb5470; }
+    .screen-event.event-777 .slot-strip span { color: #fff0a1; text-shadow: 0 0 18px #ffc72b, 0 0 40px #ffb700; }
+    .screen-event.event-111 { --event-accent: #86e2b1; }
+    .screen-event.event-222 { --event-accent: #8bd9e1; }
+    .screen-event.event-333 { --event-accent: #c8e77e; }
+    .screen-event.event-444 { --event-accent: #c4b1ff; }
+    .screen-event.event-555 { --event-accent: #ffad84; }
+    .screen-event.event-666 { --event-accent: #ff7068; }
+    .screen-event.event-888 { --event-accent: #8cbeff; }
+    .screen-event.event-999 { --event-accent: #fa93d2; }
+    .event-panel { position: relative; z-index: 2; width: min(980px, 100%); padding: 34px 22px 26px; background: transparent; text-align: center; animation: eventEntrance .65s cubic-bezier(.18,.8,.25,1) both; }
+    .event-777.active .event-panel { animation: eventEntrance .65s cubic-bezier(.18,.8,.25,1) both, eventShake .75s ease-in-out 1.25s 2; }
+    .event-kicker { color: var(--event-accent); font: 12px var(--mono); }
+    .event-title { margin: 12px 0 0; color: #f2f1e9; font-size: 58px; font-weight: 700; line-height: 1.05; }
+    .event-description { max-width: 540px; margin: 14px auto 0; color: #c1c4b8; font: 12px/1.6 var(--mono); }
+    .event-number { margin: 30px 0 24px; color: var(--event-accent); font-size: 190px; font-weight: 700; line-height: .85; font-variant-numeric: tabular-nums; text-shadow: 0 0 26px var(--event-accent), 0 0 90px color-mix(in srgb, var(--event-accent) 62%, transparent); animation: eventNumber .8s cubic-bezier(.18,.8,.25,1) both; }
+    .event-13 .event-number { animation-name: eventGlitch; }
+    .event-42 .event-number { animation-name: eventPortal; }
+    .event-69 .event-number { animation-name: eventBounce; }
+    .event-111 .event-number { animation-name: eventNumber; }
+    .event-222 .event-number { animation-name: eventPortal; }
+    .event-333 .event-number { animation-name: eventNova; }
+    .event-444 .event-number { animation-name: eventGlitch; }
+    .event-555 .event-number { animation-name: eventNova; }
+    .event-666 .event-number { animation-name: eventGlitch; }
+    .event-888 .event-number { animation-name: eventPortal; }
+    .event-999 .event-number { animation-name: eventNova; }
+    .slot-machine { width: min(560px, 100%); margin: 30px auto 20px; padding: 18px; border: 2px solid var(--event-accent); background: linear-gradient(145deg, #1c160b, #050605 72%); box-shadow: 0 0 70px #ffcf6e50, inset 0 0 30px #ffcf6e18; animation: machineImpact .7s cubic-bezier(.15,.8,.25,1) .25s both; }
+    .slot-brand { margin-bottom: 14px; color: var(--event-accent); font: 11px var(--mono); }
+    .slot-reels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 12px; border: 1px solid #aa8648; background: #020303; }
+    .slot-window { height: 128px; overflow: hidden; border: 1px solid #584c34; background: repeating-linear-gradient(180deg, #11130e 0 64px, #252519 64px 128px); }
+    .slot-strip { display: flex; height: 2000%; flex-direction: column; animation: slotSpin 2.35s cubic-bezier(.12,.72,.16,1) both; }
+    .slot-strip span { display: grid; flex: 0 0 5%; place-items: center; height: 5%; color: #fff2c1; font: 700 88px var(--sans); text-shadow: 0 0 22px #ffcf6e; }
+    .slot-window:nth-child(2) .slot-strip { animation-delay: .14s; }
+    .slot-window:nth-child(3) .slot-strip { animation-delay: .3s; }
+    .slot-window:nth-child(4) .slot-strip { animation-delay: .48s; }
+    .slot-footer { margin-top: 13px; color: #e5d5aa; font: 10px var(--mono); }
+    .event-particles { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+    .event-particle { position: absolute; top: 50%; left: 50%; color: var(--event-accent); font-size: var(--particle-size, 22px); line-height: 1; text-shadow: 0 0 12px currentColor, 0 0 30px currentColor; transform: translate(-50%,-50%); animation: particleBlast 1.2s cubic-bezier(.14,.76,.22,1) both; }
+    .event-777 .event-particle { color: #ffdf58; text-shadow: 0 0 16px #ffc400, 0 0 38px #ffc400; }
+    .event-close { min-width: 190px; min-height: 46px; margin-top: 12px; border: 1px solid var(--event-accent, var(--lime)); background: #ffffff0b; color: var(--event-accent, var(--lime)); cursor: pointer; font: 11px var(--mono); }
+    .event-close:hover { background: #ffffff1c; }
+    .toast { position: fixed; z-index: 5; right: 22px; bottom: 20px; max-width: min(360px, calc(100% - 44px)); padding: 12px 16px; border: 1px solid var(--lime); background: var(--panel); color: var(--ink); font: 11px var(--mono); opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .footer { display: flex; justify-content: space-between; gap: 12px; padding: 17px 2px 0; color: #697367; font: 9px var(--mono); }
+
+    @keyframes orbit { to { transform: rotate(360deg); } }
+    @keyframes roll { 0% { transform: translateY(5px) scale(.96); filter: blur(3px); } 60% { transform: translateY(-3px) scale(1.03); filter: blur(0); } 100% { transform: translateY(0) scale(1); } }
+    @keyframes jackpot { 0% { transform: scale(.68) rotate(-7deg); } 62% { transform: scale(1.12) rotate(3deg); } 100% { transform: scale(1) rotate(0); } }
+    @keyframes glitch { 0%,100% { transform: translate(0); } 25% { transform: translate(-5px, 1px) skew(-4deg); } 50% { transform: translate(4px, -2px) skew(3deg); } 75% { transform: translate(-2px); } }
+    @keyframes cosmic { 0% { transform: scale(.7); filter: blur(8px); } 55% { transform: scale(1.12); filter: blur(0); } 100% { transform: scale(1); } }
+    @keyframes sevenSpark { 0% { transform: scale(.55) rotate(-18deg); filter: brightness(.7); } 55% { transform: scale(1.18) rotate(9deg); filter: brightness(1.8); } 100% { transform: scale(1) rotate(0); filter: brightness(1); } }
+    @keyframes hexFlicker { 0%,100% { transform: translate(0); opacity: 1; } 20% { transform: translate(-7px, 1px) skew(-7deg); opacity: .35; } 45% { transform: translate(5px, -2px) skew(5deg); opacity: .9; } 70% { transform: translate(-2px); opacity: .5; } }
+    @keyframes cosmicPulse { 0% { transform: scale(.3); filter: blur(12px); } 58% { transform: scale(1.2); filter: blur(0); } 78% { transform: scale(.94); } 100% { transform: scale(1); } }
+    @keyframes doubleBounce { 0%,100% { transform: translateY(0) scale(1); } 28% { transform: translateY(-18px) scale(1.08); } 52% { transform: translateY(0) scale(.96); } 76% { transform: translateY(-9px) scale(1.03); } }
+    @keyframes supernova { 0% { transform: scale(.15) rotate(-24deg); filter: brightness(.4) blur(10px); } 48% { transform: scale(1.3) rotate(8deg); filter: brightness(2.4) blur(0); } 72% { transform: scale(.92) rotate(-3deg); filter: brightness(1.5); } 100% { transform: scale(1) rotate(0); filter: brightness(1); } }
+    @keyframes oneHundred { 0% { transform: scale(.2); filter: brightness(3) blur(8px); opacity: .2; } 55% { transform: scale(1.28); filter: brightness(2); opacity: 1; } 100% { transform: scale(1); filter: brightness(1); } }
+    @keyframes eventRays { to { transform: rotate(360deg); } }
+    @keyframes eventEntrance { from { transform: translateY(22px) scale(.92); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    @keyframes eventNumber { 0% { transform: scale(.2) rotate(-16deg); filter: blur(9px); } 65% { transform: scale(1.17) rotate(4deg); filter: blur(0); } 100% { transform: scale(1); } }
+    @keyframes eventGlitch { 0%,100% { transform: translate(0) skew(0); } 15% { transform: translate(-10px, 2px) skew(-8deg); } 35% { transform: translate(8px, -2px) skew(6deg); } 58% { transform: translate(-4px) skew(-3deg); } 78% { transform: translate(3px); } }
+    @keyframes eventPortal { 0% { transform: scale(.12) rotate(-90deg); filter: blur(12px); } 72% { transform: scale(1.12) rotate(8deg); filter: blur(0); } 100% { transform: scale(1) rotate(0); } }
+    @keyframes eventBounce { 0%,100% { transform: translateY(0) scale(1); } 28% { transform: translateY(-24px) scale(1.12); } 52% { transform: translateY(0) scale(.92); } 76% { transform: translateY(-12px) scale(1.05); } }
+    @keyframes eventNova { 0% { transform: scale(.05) rotate(-30deg); filter: brightness(4) blur(18px); } 50% { transform: scale(1.35) rotate(7deg); filter: brightness(2.8) blur(0); } 78% { transform: scale(.92) rotate(-2deg); filter: brightness(1.5); } 100% { transform: scale(1); filter: brightness(1); } }
+    @keyframes slotSpin { 0% { transform: translateY(0); } 66% { transform: translateY(-72%); } 82% { transform: translateY(-88%); } 93% { transform: translateY(-94.2%); } 100% { transform: translateY(-95%); } }
+    @keyframes cutFlash { 0% { opacity: .92; } 100% { opacity: 0; } }
+    @keyframes eventShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+    @keyframes machineImpact { 0% { transform: translateY(35px) scale(.72) rotateX(16deg); opacity: 0; } 65% { transform: translateY(-7px) scale(1.04); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+    @keyframes particleBlast { 0% { transform: translate(-50%,-50%) scale(.1); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--particle-x)),calc(-50% + var(--particle-y))) rotate(32deg) scale(.05); opacity: 0; } }
+    @keyframes firstLight { 0% { transform: scale(.3); filter: brightness(3); opacity: 0; } 100% { transform: scale(1); filter: brightness(1); opacity: 1; } }
+    @keyframes twinOrbit { from { transform: rotate(-22deg) scale(.55); } to { transform: rotate(338deg) scale(1); } }
+    @keyframes emeraldWave { 0% { transform: scale(.2); filter: hue-rotate(-45deg) brightness(2); } 60% { transform: scale(1.2); } 100% { transform: scale(1); filter: hue-rotate(0) brightness(1); } }
+    @keyframes fourfoldWave { 0%,100% { transform: skew(0) scale(1); } 25% { transform: skew(-9deg) scale(1.12); } 50% { transform: skew(8deg) scale(.94); } 75% { transform: skew(-4deg) scale(1.06); } }
+    @keyframes wildfire { 0% { transform: translateY(30px) scale(.7); filter: brightness(3) blur(8px); } 55% { transform: translateY(-10px) scale(1.18); filter: brightness(2); } 100% { transform: translateY(0) scale(1); filter: brightness(1); } }
+    @keyframes goldRain { 0% { transform: translateY(-30px) scale(.6); filter: brightness(4); } 35% { transform: translateY(8px) scale(1.18); } 68% { transform: translateY(-4px) scale(.95); filter: brightness(2); } 100% { transform: translateY(0) scale(1); filter: brightness(1); } }
+    @keyframes divineNova { 0% { transform: scale(.02) rotate(-45deg); filter: brightness(5) blur(18px); } 55% { transform: scale(1.4) rotate(12deg); filter: brightness(3) blur(0); } 80% { transform: scale(.92) rotate(-4deg); } 100% { transform: scale(1) rotate(0); filter: brightness(1); } }
+    .result-number.passive-111 { animation: firstLight .85s cubic-bezier(.18,.8,.25,1); }
+    .result-number.passive-222 { animation: twinOrbit 1.1s cubic-bezier(.2,.75,.2,1); }
+    .result-number.passive-333 { animation: emeraldWave .9s ease-out; }
+    .result-number.passive-444 { animation: fourfoldWave .85s ease-in-out; }
+    .result-number.passive-555 { animation: wildfire 1s cubic-bezier(.16,.8,.24,1); }
+    .result-number.passive-666 { animation: glitch .75s steps(2,end); }
+    .result-number.event-777, .result-number.passive-777 { color: #ffdf58; text-shadow: 0 0 24px #ffc400, 0 0 70px #ffb700; animation: goldRain 1.2s cubic-bezier(.14,.8,.24,1); }
+    .result-number.passive-888 { animation: cosmicPulse 1.1s ease-out; }
+    .result-number.passive-999 { animation: supernova 1.25s cubic-bezier(.15,.75,.2,1); }
+    .result-number.event-1000, .result-number.passive-1000 { color: #fff0b0; text-shadow: 0 0 32px #ffcf6e, 0 0 90px #ff846c; animation: divineNova 1.5s cubic-bezier(.15,.75,.2,1); }
+
+    @media (max-width: 760px) {
+      .shell { width: min(540px, calc(100% - 24px)); padding-top: 18px; }
+      .topbar { padding-bottom: 17px; }
+      .top-stats { gap: 15px; }
+      .layout { grid-template-columns: 1fr; gap: 13px; padding-top: 14px; }
+      .side-column { grid-template-columns: 1fr; gap: 13px; }
+      .machine { min-height: 400px; padding-inline: 15px; }
+      .number-stage { height: 210px; }
+      .stats-strip .stat-cell { padding: 13px 10px; }
+      .stat-cell strong { font-size: 15px; }
+      .rarity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .animation-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .event-panel { padding: 27px 18px 20px; }
+      .event-title { font-size: 36px; }
+      .event-number { font-size: 122px; }
+      .slot-machine { padding: 9px; }
+      .slot-reels { gap: 6px; padding: 7px; }
+      .slot-window { height: 86px; }
+      .slot-strip span { font-size: 58px; }
+      .footer { padding-top: 13px; }
+    }
+    @media (max-width: 380px) {
+      .brand { gap: 8px; }
+      .brand-tag { font-size: 9px; }
+      .top-stats { gap: 10px; }
+      .top-stat strong { font-size: 12px; }
+      .eyebrow { font-size: 9px; }
+      .upgrade { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 7px; padding-inline: 7px; }
+      .upgrade-icon { width: 30px; height: 30px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">✳</div>
+        <div><div class="brand-name">ODDITY</div><div class="brand-tag">A SMALL GAME ABOUT BIG NUMBERS</div></div>
+      </div>
+      <div class="top-stats">
+        <div class="top-stat"><span class="eyebrow">Total rolls</span><strong id="roll-count">0</strong></div>
+        <div class="top-stat"><span class="eyebrow">Star shards</span><strong class="shard-count" id="shards">0</strong></div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <div class="main-column">
+        <section class="panel machine" aria-label="Number rolling machine">
+          <div class="machine-label"><span>Number generator // 01</span><span id="luck-label">SPECIAL CHANCE: 1.5% BASE</span></div>
+          <div class="number-stage" id="number-stage" aria-live="polite" aria-atomic="true">
+            <span class="result-number" id="result-number" tabindex="-1">?</span>
+          </div>
+          <div class="result-caption" id="result-caption">The machine is waiting.</div>
+          <button class="roll-button" id="roll-button" type="button" aria-label="Roll a number"><span id="roll-label">ROLL THE DICE</span><kbd id="roll-shortcut">SPACE</kbd></button>
+          <div class="roll-subtext">ROLL A NUMBER. SEE WHAT THE UNIVERSE DOES.</div>
+          <div class="preview-actions">
+            <button class="preview-button" id="preview-seven" type="button">PREVIEW 777 CINEMATIC</button>
+            <button class="preview-button" id="preview-hundred" type="button">PREVIEW 100</button>
+            <button class="preview-button" id="preview-777" type="button">PREVIEW 777</button>
+            <button class="preview-button" id="preview-thousand" type="button">PREVIEW 1,000</button>
+          </div>
+        </section>
+
+        <section class="panel stats-strip" aria-label="Run statistics">
+          <div class="stat-cell"><span class="eyebrow">Spark balance</span><strong id="balance">100</strong></div>
+          <div class="stat-cell"><span class="eyebrow">This run</span><strong id="run-earned">0</strong></div>
+          <div class="stat-cell"><span class="eyebrow">Roll streak</span><strong id="streak">0</strong></div>
+        </section>
+
+        <section class="panel history-panel" aria-label="Recent rolls">
+          <div class="section-heading"><h2>Recent numbers</h2><span id="history-count">LAST 0</span></div>
+          <div class="history-list" id="history-list"><span class="history-empty">Your numbers will land here.</span></div>
+        </section>
+
+        <section class="panel index-panel" aria-label="Roll rarity index">
+          <div class="section-heading"><h2>Roll Index</h2><span>BASE ODDS · 1–1,000</span></div>
+          <div class="rarity-grid">
+            <article class="rarity-card common"><strong>COMMON</strong><span>1–340 · 34%</span><p>Standard payout</p></article>
+            <article class="rarity-card uncommon"><strong>UNCOMMON</strong><span>341–590 · 25%</span><p>×1.25 sparks</p></article>
+            <article class="rarity-card rare"><strong>RARE</strong><span>591–790 · 20%</span><p>×1.5 sparks</p></article>
+            <article class="rarity-card epic"><strong>EPIC</strong><span>791–890 · 10%</span><p>×2 sparks</p></article>
+            <article class="rarity-card legendary"><strong>LEGENDARY</strong><span>891–960 · 7%</span><p>×3 sparks</p></article>
+            <article class="rarity-card mythic"><strong>MYTHIC</strong><span>961–980 · 2%</span><p>×5 sparks</p></article>
+            <article class="rarity-card celestial"><strong>CELESTIAL</strong><span>981–990 · 1%</span><p>×8 sparks</p></article>
+            <article class="rarity-card divine"><strong>DIVINE</strong><span>991–1,000 · 1%</span><p>×12 + 1,000 sparks</p></article>
+          </div>
+          <div class="oddity-list"><span class="eyebrow">NUMBER EFFECTS</span><p><strong>7 Lucky Seven</strong> ×3 · <strong>13 Hex Breaker</strong> ×13 · <strong>42 The Answer</strong> +420 · <strong>69 Nice</strong> ×2 · <strong>100 Century</strong> +1,000 · <strong>111–999</strong> milestone scenes · <strong>1,000 Divine</strong> ×12 + 1,000</p></div>
+          <div class="animation-library">
+            <div class="animation-heading"><span>PASSIVE ANIMATIONS</span><span>ROLL A NUMBER TO UNLOCK</span></div>
+            <div class="animation-list" id="animation-list"></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side-column">
+        <section class="panel side-panel">
+          <div class="section-heading"><h2>Workshop</h2><span>PERMANENT THIS RUN</span></div>
+          <div class="upgrade-list">
+            <div class="upgrade">
+              <div class="upgrade-icon" aria-hidden="true">×</div>
+              <div class="upgrade-copy"><strong>Amplifier</strong><span id="amp-description">Payout power +50%</span></div>
+              <button class="buy-button" id="buy-amp" type="button" aria-label="Buy Amplifier">80 ◈</button>
+            </div>
+            <div class="upgrade">
+              <div class="upgrade-icon" aria-hidden="true">✧</div>
+              <div class="upgrade-copy"><strong>Luck Lens</strong><span id="luck-description">Rare number odds +2.5%</span></div>
+              <button class="buy-button" id="buy-luck" type="button" aria-label="Buy Luck Lens">130 ◈</button>
+            </div>
+            <div class="upgrade">
+              <div class="upgrade-icon" aria-hidden="true">↗</div>
+              <div class="upgrade-copy"><strong>Echo Coil</strong><span id="echo-description">Streak bonus +6% per roll</span></div>
+              <button class="buy-button" id="buy-echo" type="button" aria-label="Buy Echo Coil">100 ◈</button>
+            </div>
+            <div class="upgrade">
+              <div class="upgrade-icon" aria-hidden="true">»</div>
+              <div class="upgrade-copy"><strong>Roll Engine</strong><span id="speed-description">Cooldown 6.0s · LV 0</span></div>
+              <button class="buy-button" id="buy-speed" type="button" aria-label="Buy Roll Engine">180 ◈</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel side-panel">
+          <div class="section-heading"><h2>Pet Stable</h2><span id="pet-equipped-label">EQUIPPED 0 / 2</span></div>
+          <div class="loadout-summary" id="pet-loadout">No pets equipped.</div>
+          <div class="pet-list" id="pet-list"></div>
+          <div class="gacha-actions"><button class="gacha-button" id="roll-pet" type="button">ROLL PET · 1,000 ◈</button></div>
+          <section class="offer-card" id="pet-offer" aria-live="polite" hidden></section>
+        </section>
+
+        <section class="panel side-panel">
+          <div class="section-heading"><h2>Material Forge</h2><span id="material-tier-label">EQUIPPED 0 / 1</span></div>
+          <div class="loadout-summary" id="material-summary">No material equipped.</div>
+          <div class="material-list" id="material-list"></div>
+          <div class="gacha-actions"><button class="gacha-button" id="roll-material" type="button">ROLL MATERIAL · 1,600 ◈</button></div>
+          <section class="offer-card" id="material-offer" aria-live="polite" hidden></section>
+        </section>
+
+        <section class="panel side-panel rebirth-panel">
+          <div class="section-heading"><h2>Rebirth</h2><span>START OVER, STRONGER</span></div>
+          <div class="rebirth-copy" id="rebirth-copy">Reach <strong>5,000</strong> sparks this run to earn a Star Shard. Rebirth resets your sparks and workshop upgrades; Star Shards, pets, and materials stay forever.</div>
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="Rebirth progress" aria-valuemin="0" aria-valuemax="5000" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="rebirth-bottom"><span id="rebirth-progress">0 / 5,000</span><span id="next-shard">+1 SHARD</span></div>
+          <button class="rebirth-button" id="rebirth-button" type="button" disabled>REBIRTH — 5,000 ◈</button>
+        </section>
+        <section class="panel settings-panel">
+          <div class="section-heading"><h2>Settings</h2><span>ACCESSIBILITY</span></div>
+          <label class="setting-row" for="animations-toggle">
+            <input id="animations-toggle" type="checkbox" checked>
+            <span><strong>Number animations</strong><small>Turn off all number and passive animations.</small></span>
+          </label>
+        </section>
+      </aside>
+    </main>
+    <footer class="footer"><span>YOUR PROGRESS SAVES AUTOMATICALLY</span><span>GOOD LUCK OUT THERE.</span></footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="screen-event" id="screen-event" role="dialog" aria-modal="true" aria-label="Special roll event" aria-hidden="true">
+    <div class="event-particles" id="event-particles" aria-hidden="true"></div>
+    <section class="event-panel">
+      <div class="event-content" id="event-content"></div>
+      <button class="event-close" id="event-close" type="button">CONTINUE</button>
+    </section>
+  </div>
+
+  <script>
+    const SAVE_KEY = "oddity-save-v1";
+    const SPECIAL_ROLLS = [
+      { number: 7, name: "Lucky Seven", rarity: "Lucky", factor: 3, bonus: 0, className: "jackpot", eventTitle: "TRIPLE SEVEN", kicker: "LUCKY HIT", description: "Three golden reels. One perfect line. Jackpot secured.", digits: [7, 7, 7] },
+      { number: 13, name: "Hex Breaker", rarity: "Cursed", factor: 13, bonus: 0, className: "hex", eventTitle: "THE HEX CRACKS", kicker: "HEX BREAKER", description: "Bad luck just became a thirteen-fold payout." },
+      { number: 42, name: "The Answer", rarity: "Cosmic", factor: 1, bonus: 420, className: "cosmic", eventTitle: "THE ANSWER", kicker: "COSMIC SIGNAL", description: "The whole universe points to one number." },
+      { number: 69, name: "Nice", rarity: "Lucky", factor: 2, bonus: 0, className: "mystery", eventTitle: "NICE", kicker: "DOUBLE TAKE", description: "A rare hit. A doubled payout. You know the drill." },
+      { number: 100, name: "Century", rarity: "Century", factor: 1, bonus: 1000, className: "perfect", eventTitle: "CENTURY JACKPOT", kicker: "THREE-DIGIT HIT", description: "The first triple-digit milestone. Watch the reels lock in.", digits: [1, 0, 0] },
+      { number: 111, name: "First Light", rarity: "Repeater", factor: 2, bonus: 111, className: "event-111", eventTitle: "FIRST LIGHT", kicker: "TRIPLE DIGIT", description: "Three ones align. A new pattern wakes up." },
+      { number: 222, name: "Twin Moons", rarity: "Repeater", factor: 2, bonus: 222, className: "event-222", eventTitle: "TWIN MOONS", kicker: "TRIPLE DIGIT", description: "Two moons become three. The night answers back." },
+      { number: 333, name: "Emerald Pulse", rarity: "Repeater", factor: 3, bonus: 333, className: "event-333", eventTitle: "EMERALD PULSE", kicker: "TRIPLE DIGIT", description: "An emerald wave breaks across the whole machine." },
+      { number: 444, name: "Fourfold", rarity: "Repeater", factor: 3, bonus: 444, className: "event-444", eventTitle: "FOURFOLD", kicker: "TRIPLE DIGIT", description: "Four echoes ring out from a number of threes." },
+      { number: 555, name: "Wildfire", rarity: "Repeater", factor: 4, bonus: 555, className: "event-555", eventTitle: "WILDFIRE", kicker: "TRIPLE DIGIT", description: "A wall of sparks ignites the black." },
+      { number: 666, name: "Infernal Crown", rarity: "Omen", factor: 6, bonus: 666, className: "event-666", eventTitle: "INFERNAL CROWN", kicker: "DARK OMEN", description: "The screen fractures. Something answers from below." },
+      { number: 777, name: "Golden Jackpot", rarity: "Jackpot", factor: 7, bonus: 777, className: "event-777", eventTitle: "GOLDEN JACKPOT", kicker: "777 · JACKPOT", description: "Every sparkle in the machine turns to gold. The reels will not stop." , digits: [7, 7, 7] },
+      { number: 888, name: "Infinity Gate", rarity: "Repeater", factor: 6, bonus: 888, className: "event-888", eventTitle: "INFINITY GATE", kicker: "TRIPLE DIGIT", description: "The loop opens. Blue-white light pours through." },
+      { number: 999, name: "Last Light", rarity: "Repeater", factor: 8, bonus: 999, className: "event-999", eventTitle: "LAST LIGHT", kicker: "ONE STEP FROM DIVINE", description: "The final triple digit shakes the screen to its edge." },
+      { number: 1000, name: "Divine", rarity: "Divine", factor: 1, bonus: 1000, className: "event-1000", eventTitle: "DIVINE JACKPOT", kicker: "PERFECT ROLL · 1 IN 1,000", description: "Four reels. A flawless 1–0–0–0. The machine has no higher number.", digits: [1, 0, 0, 0] }
+    ];
+    const SPECIAL_BY_NUMBER = new Map(SPECIAL_ROLLS.map((special) => [special.number, special]));
+    const SPECIALS = new Set(SPECIAL_BY_NUMBER.keys());
+    const RARITIES = [
+      { name: "Common", min: 1, max: 340, factor: 1, effect: "Standard payout" },
+      { name: "Uncommon", min: 341, max: 590, factor: 1.25, effect: "×1.25 sparks" },
+      { name: "Rare", min: 591, max: 790, factor: 1.5, effect: "×1.5 sparks" },
+      { name: "Epic", min: 791, max: 890, factor: 2, effect: "×2 sparks" },
+      { name: "Legendary", min: 891, max: 960, factor: 3, effect: "×3 sparks" },
+      { name: "Mythic", min: 961, max: 980, factor: 5, effect: "×5 sparks" },
+      { name: "Celestial", min: 981, max: 990, factor: 8, effect: "×8 sparks" },
+      { name: "Divine", min: 991, max: 1000, factor: 12, effect: "×12 sparks" }
+    ];
+    const ANIMATION_PASSIVES = [
+      { number: 7, name: "Lucky Seven", animation: "Seven Spark", className: "passive-seven" },
+      { number: 13, name: "Hex Breaker", animation: "Hex Flicker", className: "passive-thirteen" },
+      { number: 42, name: "The Answer", animation: "Cosmic Pulse", className: "passive-forty-two" },
+      { number: 69, name: "Nice", animation: "Double Bounce", className: "passive-sixty-nine" },
+      { number: 100, name: "Century", animation: "Century Surge", className: "passive-hundred" },
+      { number: 111, name: "First Light", animation: "First Light", className: "passive-111" },
+      { number: 222, name: "Twin Moons", animation: "Twin Orbit", className: "passive-222" },
+      { number: 333, name: "Emerald Pulse", animation: "Emerald Pulse", className: "passive-333" },
+      { number: 444, name: "Fourfold", animation: "Fourfold Wave", className: "passive-444" },
+      { number: 555, name: "Wildfire", animation: "Wildfire", className: "passive-555" },
+      { number: 666, name: "Infernal Crown", animation: "Infernal Crown", className: "passive-666" },
+      { number: 777, name: "Golden Jackpot", animation: "Gold Rain", className: "passive-777" },
+      { number: 888, name: "Infinity Gate", animation: "Infinity Gate", className: "passive-888" },
+      { number: 999, name: "Last Light", animation: "Last Light", className: "passive-999" },
+      { number: 1000, name: "Divine", animation: "Divine Nova", className: "passive-1000" }
+    ];
+    const PETS = [
+      { id: "mossling", name: "Mossling", glyph: "✿", tier: "Common", weight: 32, keepCost: 900, incomeBonus: 0.1, speedBonus: 0, streakBonus: 0.01 },
+      { id: "quicktail", name: "Quicktail", glyph: "↯", tier: "Common", weight: 28, keepCost: 1100, incomeBonus: 0, speedBonus: 0.08, streakBonus: 0.01 },
+      { id: "fortune-finch", name: "Fortune Finch", glyph: "✧", tier: "Uncommon", weight: 20, keepCost: 1800, incomeBonus: 0.05, speedBonus: 0.02, streakBonus: 0.03 },
+      { id: "comet-fox", name: "Comet Fox", glyph: "☄", tier: "Rare", weight: 14, keepCost: 3200, incomeBonus: 0.2, speedBonus: 0.08, streakBonus: 0.03 },
+      { id: "cinder-owl", name: "Cinder Owl", glyph: "◉", tier: "Rare", weight: 13, keepCost: 3900, incomeBonus: 0.12, speedBonus: 0.02, streakBonus: 0.08 },
+      { id: "tide-sprite", name: "Tide Sprite", glyph: "≈", tier: "Uncommon", weight: 19, keepCost: 2100, incomeBonus: 0.08, speedBonus: 0.04, streakBonus: 0.04 },
+      { id: "prism-pup", name: "Prism Pup", glyph: "◇", tier: "Epic", weight: 8, keepCost: 7200, incomeBonus: 0.3, speedBonus: 0.06, streakBonus: 0.1 },
+      { id: "thunder-moth", name: "Thunder Moth", glyph: "ϟ", tier: "Rare", weight: 12, keepCost: 4500, incomeBonus: 0.06, speedBonus: 0.15, streakBonus: 0.07 },
+      { id: "star-whale", name: "Star Whale", glyph: "✦", tier: "Mythic", weight: 2, keepCost: 30000, incomeBonus: 0.65, speedBonus: 0.1, streakBonus: 0.16 },
+      { id: "void-kitten", name: "Void Kitten", glyph: "●", tier: "Epic", weight: 7, keepCost: 9500, incomeBonus: 0.18, speedBonus: 0.2, streakBonus: 0.1 },
+      { id: "sun-deer", name: "Sun Deer", glyph: "☼", tier: "Legendary", weight: 3, keepCost: 24000, incomeBonus: 0.5, speedBonus: 0.08, streakBonus: 0.2 },
+      { id: "nebula-drake", name: "Nebula Drake", glyph: "✧", tier: "Mythic", weight: 1, keepCost: 50000, incomeBonus: 0.8, speedBonus: 0.15, streakBonus: 0.25 }
+    ];
+    const MATERIALS = [
+      { id: "copper", name: "Copper", tier: "Common", weight: 32, keepCost: 1400, incomeBonus: 0.5, speedBonus: 0, streakBonus: 0.01 },
+      { id: "iron", name: "Iron", tier: "Common", weight: 27, keepCost: 1900, incomeBonus: 1, speedBonus: 0.01, streakBonus: 0.02 },
+      { id: "silver", name: "Silver", tier: "Uncommon", weight: 22, keepCost: 3000, incomeBonus: 1.5, speedBonus: 0.02, streakBonus: 0.03 },
+      { id: "gold", name: "Gold", tier: "Uncommon", weight: 19, keepCost: 4200, incomeBonus: 2, speedBonus: 0.03, streakBonus: 0.04 },
+      { id: "starsteel", name: "Starsteel", tier: "Rare", weight: 15, keepCost: 6500, incomeBonus: 2.5, speedBonus: 0.04, streakBonus: 0.05 },
+      { id: "moonstone", name: "Moonstone", tier: "Rare", weight: 13, keepCost: 8200, incomeBonus: 3, speedBonus: 0.04, streakBonus: 0.07 },
+      { id: "stormglass", name: "Stormglass", tier: "Epic", weight: 9, keepCost: 12000, incomeBonus: 3.5, speedBonus: 0.07, streakBonus: 0.07 },
+      { id: "sunshard", name: "Sunshard", tier: "Epic", weight: 8, keepCost: 16000, incomeBonus: 4, speedBonus: 0.06, streakBonus: 0.1 },
+      { id: "void-ore", name: "Void Ore", tier: "Epic", weight: 7, keepCost: 21000, incomeBonus: 4.5, speedBonus: 0.1, streakBonus: 0.09 },
+      { id: "dragonite", name: "Dragonite", tier: "Legendary", weight: 5, keepCost: 28000, incomeBonus: 5, speedBonus: 0.08, streakBonus: 0.13 },
+      { id: "aurora-core", name: "Aurora Core", tier: "Legendary", weight: 4, keepCost: 37000, incomeBonus: 5.5, speedBonus: 0.11, streakBonus: 0.13 },
+      { id: "prism-crystal", name: "Prism Crystal", tier: "Mythic", weight: 3, keepCost: 50000, incomeBonus: 6, speedBonus: 0.12, streakBonus: 0.16 },
+      { id: "comet-iron", name: "Comet Iron", tier: "Mythic", weight: 2, keepCost: 68000, incomeBonus: 6.5, speedBonus: 0.15, streakBonus: 0.17 },
+      { id: "worldstone", name: "Worldstone", tier: "Celestial", weight: 1, keepCost: 90000, incomeBonus: 7, speedBonus: 0.16, streakBonus: 0.2 },
+      { id: "origin-star", name: "Origin Star", tier: "Divine", weight: 1, keepCost: 125000, incomeBonus: 7.5, speedBonus: 0.2, streakBonus: 0.25 }
+    ];
+    const PET_ROLL_COST = 1000;
+    const MATERIAL_ROLL_COST = 1600;
+    const EVENT_PARTICLE_VECTORS = [
+      [-46, -28], [-34, -42], [-21, -34], [-8, -48], [8, -37], [23, -45], [39, -31], [47, -12],
+      [43, 11], [34, 32], [18, 45], [2, 37], [-14, 47], [-31, 37], [-45, 20], [-49, 1],
+      [-27, -10], [-11, 14], [14, 18], [29, 4]
+    ];
+    const SLOT_REEL_RUNUP = [
+      [3, 8, 2, 5, 0, 4, 9, 1, 6, 2, 8, 5, 1, 4, 0, 9, 3, 6, 2],
+      [4, 1, 9, 3, 7, 2, 5, 0, 8, 6, 1, 4, 9, 2, 7, 3, 0, 5, 8],
+      [8, 2, 6, 0, 5, 9, 1, 4, 7, 3, 8, 2, 6, 1, 9, 5, 0, 4, 3]
+    ];
+    const UPGRADE_BASE_COST = { amp: 80, luck: 130, echo: 100, speed: 180 };
+    const UPGRADE_NAMES = { amp: "Amplifier", luck: "Luck Lens", echo: "Echo Coil", speed: "Roll Engine" };
+    const defaults = {
+      balance: 100,
+      runEarned: 0,
+      totalEarned: 0,
+      rolls: 0,
+      shards: 0,
+      rebirths: 0,
+      streak: 0,
+      lastRollAt: 0,
+      upgrades: { amp: 0, luck: 0, echo: 0, speed: 0 },
+      history: [],
+      discoveredNumbers: [],
+      equippedAnimations: [],
+      animationsEnabled: true,
+      ownedPets: [],
+      equippedPets: [],
+      ownedMaterials: [],
+      equippedMaterial: null,
+      petOfferId: null,
+      materialOfferId: null
+    };
+
+    function loadGame() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+        if (!saved || typeof saved !== "object") return structuredClone(defaults);
+        const history = Array.isArray(saved.history) ? saved.history.slice(0, 10) : [];
+        const discoveredNumbers = [...new Set([
+          ...(Array.isArray(saved.discoveredNumbers) ? saved.discoveredNumbers : []),
+          ...history.filter((item) => item?.special).map((item) => item.number)
+        ].map(Number).filter((number) => SPECIALS.has(number)))];
+        const equippedAnimations = [...new Set((Array.isArray(saved.equippedAnimations) ? saved.equippedAnimations : [])
+          .map(Number).filter((number) => discoveredNumbers.includes(number)))];
+        const legacyPets = Array.isArray(saved.petsOwned) ? saved.petsOwned : [];
+        const ownedPets = [...new Set([...(Array.isArray(saved.ownedPets) ? saved.ownedPets : []), ...legacyPets]
+          .filter((petId) => PETS.some((pet) => pet.id === petId)))];
+        const equippedPets = [...new Set((Array.isArray(saved.equippedPets) ? saved.equippedPets : saved.equippedPet ? [saved.equippedPet] : [])
+          .filter((petId) => ownedPets.includes(petId)))].slice(0, 2);
+        const legacyMaterialTier = Math.min(5, Math.max(0, Math.floor(Number(saved.materialTier) || 0)));
+        const ownedMaterials = [...new Set([...(Array.isArray(saved.ownedMaterials) ? saved.ownedMaterials : []), ...MATERIALS.slice(0, legacyMaterialTier).map((material) => material.id)]
+          .filter((materialId) => MATERIALS.some((material) => material.id === materialId)))];
+        const equippedMaterial = ownedMaterials.includes(saved.equippedMaterial)
+          ? saved.equippedMaterial
+          : legacyMaterialTier ? MATERIALS[legacyMaterialTier - 1].id : null;
+        return {
+          ...defaults,
+          ...saved,
+          upgrades: { ...defaults.upgrades, ...saved.upgrades },
+          history,
+          discoveredNumbers,
+          equippedAnimations,
+          animationsEnabled: saved.animationsEnabled !== false,
+          ownedPets,
+          equippedPets,
+          ownedMaterials,
+          equippedMaterial,
+          petOfferId: PETS.some((pet) => pet.id === saved.petOfferId && !ownedPets.includes(pet.id)) ? saved.petOfferId : null,
+          materialOfferId: MATERIALS.some((material) => material.id === saved.materialOfferId && !ownedMaterials.includes(material.id)) ? saved.materialOfferId : null
+        };
+      } catch {
+        return structuredClone(defaults);
+      }
+    }
+
+    let game = loadGame();
+    let rolling = false;
+    let displayedNumber = null;
+    let toastTimer;
+    let screenEventTimer;
+    const elements = Object.fromEntries([
+      "roll-count", "shards", "result-number", "result-caption", "number-stage", "roll-button", "luck-label",
+      "balance", "run-earned", "streak", "history-count", "history-list", "amp-description", "progress-track",
+      "luck-description", "echo-description", "speed-description", "roll-label", "roll-shortcut",
+      "buy-amp", "buy-luck", "buy-echo", "buy-speed", "rebirth-copy", "animation-list", "animations-toggle",
+      "preview-hundred", "preview-777", "preview-thousand", "pet-list", "pet-equipped-label", "pet-loadout",
+      "material-list", "material-summary", "material-tier-label", "roll-pet", "roll-material", "pet-offer", "material-offer",
+      "screen-event", "event-content", "event-particles", "event-close", "preview-seven",
+      "progress-fill", "rebirth-progress", "next-shard", "rebirth-button", "toast"
+    ].map((id) => [id, document.getElementById(id)]));
+
+    const numberFormat = new Intl.NumberFormat();
+    const format = (value) => numberFormat.format(Math.floor(value));
+    const rebirthGoal = () => 5000 * (game.rebirths + 1);
+    const equippedPets = () => game.equippedPets.map((petId) => PETS.find((pet) => pet.id === petId)).filter(Boolean);
+    const equippedMaterial = () => MATERIALS.find((material) => material.id === game.equippedMaterial);
+    const sumBonus = (items, key) => items.reduce((total, item) => total + item[key], 0);
+    const multiplier = () => 1 + game.upgrades.amp * 0.5 + game.shards * 0.25 + sumBonus(equippedPets(), "incomeBonus") + (equippedMaterial()?.incomeBonus ?? 0);
+    const rollCooldown = () => Math.max(800, Math.round(6000 * Math.pow(0.8, game.upgrades.speed) * (1 - Math.min(0.55, sumBonus(equippedPets(), "speedBonus") + (equippedMaterial()?.speedBonus ?? 0)))));
+    const currentStreakBonus = () => game.upgrades.echo * 0.06 + sumBonus(equippedPets(), "streakBonus") + (equippedMaterial()?.streakBonus ?? 0);
+    const cooldownRemaining = () => Math.max(0, Number(game.lastRollAt || 0) + rollCooldown() - Date.now());
+    const upgradeCost = (name) => Math.ceil(UPGRADE_BASE_COST[name] * Math.pow(1.62, game.upgrades[name]));
+
+    function updateRollButton() {
+      const remaining = cooldownRemaining();
+      elements["roll-label"].textContent = rolling ? "ROLLING..." : remaining > 0 ? "COOLDOWN" : "ROLL THE DICE";
+      elements["roll-shortcut"].textContent = remaining > 0 ? `${(remaining / 1000).toFixed(1)}s` : "SPACE";
+      elements["roll-button"].disabled = rolling || remaining > 0;
+      elements["roll-button"].setAttribute("aria-label", rolling ? "Roll in progress" : remaining > 0 ? `Roll available in ${(remaining / 1000).toFixed(1)} seconds` : "Roll a number");
+    }
+
+    function updateAnimationState() {
+      elements["animations-toggle"].checked = game.animationsEnabled;
+      elements["number-stage"].classList.toggle("animations-off", !game.animationsEnabled);
+      const passive = ANIMATION_PASSIVES.find((item) => item.number === displayedNumber);
+      if (passive) {
+        elements["result-number"].classList.toggle(passive.className, game.animationsEnabled && game.equippedAnimations.includes(displayedNumber));
+      }
+    }
+
+    function renderAnimationList() {
+      elements["animation-list"].replaceChildren();
+      for (const passive of ANIMATION_PASSIVES) {
+        const unlocked = game.discoveredNumbers.includes(passive.number);
+        const equipped = game.equippedAnimations.includes(passive.number);
+        const item = document.createElement("div");
+        item.className = "animation-item";
+        const name = document.createElement("strong");
+        name.textContent = `${passive.number} · ${passive.name}`;
+        const effect = document.createElement("span");
+        effect.textContent = passive.animation;
+        const button = document.createElement("button");
+        button.className = "animation-button";
+        button.type = "button";
+        button.textContent = equipped ? "EQUIPPED" : unlocked ? "EQUIP" : "LOCKED";
+        button.disabled = !unlocked || rolling;
+        button.setAttribute("aria-pressed", String(equipped));
+        button.setAttribute("aria-label", `${equipped ? "Unequip" : "Equip"} ${passive.name} animation`);
+        button.addEventListener("click", () => toggleAnimation(passive.number));
+        item.append(name, effect, button);
+        elements["animation-list"].append(item);
+      }
+    }
+
+    function petBonusText(pet) {
+      return `Spark +${(pet.incomeBonus * 100).toFixed(0)}% · Roll speed +${(pet.speedBonus * 100).toFixed(0)}% · Streak +${(pet.streakBonus * 100).toFixed(0)}% / step`;
+    }
+
+    function materialBonusText(material) {
+      return `Spark +${material.incomeBonus.toFixed(1)}× · Roll speed +${(material.speedBonus * 100).toFixed(0)}% · Streak +${(material.streakBonus * 100).toFixed(0)}% / step`;
+    }
+
+    function renderOffer(type) {
+      const isPet = type === "pet";
+      const offerId = isPet ? game.petOfferId : game.materialOfferId;
+      const card = elements[`${type}-offer`];
+      card.replaceChildren();
+      card.hidden = !offerId;
+      if (!offerId) return;
+
+      const item = (isPet ? PETS : MATERIALS).find((entry) => entry.id === offerId);
+      if (!item) return;
+      const label = document.createElement("div");
+      label.className = "offer-label";
+      label.textContent = `${item.tier.toUpperCase()} ${isPet ? "PET" : "MATERIAL"} · KEEP FOR ${format(item.keepCost)} ◈`;
+      const title = document.createElement("h3");
+      title.textContent = `${item.glyph ? `${item.glyph} ` : ""}${item.name}`;
+      const stats = document.createElement("div");
+      stats.className = "offer-stats";
+      stats.textContent = isPet ? petBonusText(item) : materialBonusText(item);
+      const actions = document.createElement("div");
+      actions.className = "offer-actions";
+      const keep = document.createElement("button");
+      keep.type = "button";
+      keep.textContent = `KEEP · ${format(item.keepCost)} ◈`;
+      keep.disabled = rolling || game.balance < item.keepCost;
+      keep.addEventListener("click", () => keepOffer(type));
+      const pass = document.createElement("button");
+      pass.type = "button";
+      pass.textContent = "PASS";
+      pass.disabled = rolling;
+      pass.addEventListener("click", () => passOffer(type));
+      actions.append(keep, pass);
+      card.append(label, title, stats, actions);
+    }
+
+    function renderPetShop() {
+      const activePets = equippedPets();
+      elements["pet-equipped-label"].textContent = `EQUIPPED ${activePets.length} / 2`;
+      elements["pet-loadout"].textContent = activePets.length
+        ? activePets.map((pet, index) => `${index + 1}. ${pet.name} — ${petBonusText(pet)}`).join(" | ")
+        : "No pets equipped. Keep a pet roll to fill a slot.";
+      elements["pet-list"].replaceChildren();
+      for (const pet of PETS) {
+        const owned = game.ownedPets.includes(pet.id);
+        const equipped = game.equippedPets.includes(pet.id);
+        const card = document.createElement("div");
+        card.className = "pet-card";
+        const mark = document.createElement("span");
+        mark.className = "pet-mark";
+        mark.setAttribute("aria-hidden", "true");
+        mark.textContent = pet.glyph;
+        const copy = document.createElement("div");
+        copy.className = "pet-copy";
+        const name = document.createElement("strong");
+        name.textContent = `${pet.name} · ${pet.tier}`;
+        const effect = document.createElement("span");
+        effect.textContent = petBonusText(pet);
+        copy.append(name, effect);
+        const button = document.createElement("button");
+        button.className = "pet-button";
+        button.type = "button";
+        button.textContent = equipped ? "UNEQUIP" : owned ? "EQUIP" : "UNOWNED";
+        button.disabled = rolling || !owned || (!equipped && activePets.length >= 2);
+        button.setAttribute("aria-pressed", String(equipped));
+        button.setAttribute("aria-label", `${equipped ? "Unequip" : "Equip"} ${pet.name}: ${petBonusText(pet)}`);
+        button.addEventListener("click", () => togglePet(pet.id));
+        card.append(mark, copy, button);
+        elements["pet-list"].append(card);
+      }
+      elements["roll-pet"].textContent = `ROLL PET · ${format(PET_ROLL_COST)} ◈`;
+      elements["roll-pet"].disabled = rolling || Boolean(game.petOfferId) || game.balance < PET_ROLL_COST || game.ownedPets.length === PETS.length;
+      renderOffer("pet");
+    }
+
+    function renderMaterials() {
+      const activeMaterial = equippedMaterial();
+      elements["material-tier-label"].textContent = `EQUIPPED ${activeMaterial ? "1" : "0"} / 1`;
+      elements["material-summary"].textContent = activeMaterial
+        ? `${activeMaterial.name} · ${materialBonusText(activeMaterial)}`
+        : "No material equipped. Keep a material roll to fill your slot.";
+      elements["material-list"].replaceChildren();
+      for (const material of MATERIALS) {
+        const owned = game.ownedMaterials.includes(material.id);
+        const equipped = game.equippedMaterial === material.id;
+        const row = document.createElement("div");
+        row.className = "material-item";
+        const copy = document.createElement("div");
+        const name = document.createElement("strong");
+        name.textContent = `${material.name} · ${material.tier}`;
+        const effect = document.createElement("span");
+        effect.textContent = materialBonusText(material);
+        copy.append(name, effect);
+        const button = document.createElement("button");
+        button.className = "buy-button";
+        button.type = "button";
+        button.textContent = equipped ? "EQUIPPED" : owned ? "EQUIP" : "UNOWNED";
+        button.disabled = rolling || !owned || equipped;
+        button.setAttribute("aria-label", `${owned ? `Equip ${material.name}` : `${material.name} is not owned`}: ${materialBonusText(material)}`);
+        button.addEventListener("click", () => equipMaterial(material.id));
+        row.append(copy, button);
+        elements["material-list"].append(row);
+      }
+      elements["roll-material"].textContent = `ROLL MATERIAL · ${format(MATERIAL_ROLL_COST)} ◈`;
+      elements["roll-material"].disabled = rolling || Boolean(game.materialOfferId) || game.balance < MATERIAL_ROLL_COST || game.ownedMaterials.length === MATERIALS.length;
+      renderOffer("material");
+    }
+
+    function toggleAnimation(number) {
+      if (rolling || !game.discoveredNumbers.includes(number)) return;
+      if (game.equippedAnimations.includes(number)) {
+        game.equippedAnimations = game.equippedAnimations.filter((equippedNumber) => equippedNumber !== number);
+      } else {
+        game.equippedAnimations.push(number);
+      }
+      render();
+      const passive = ANIMATION_PASSIVES.find((item) => item.number === number);
+      showToast(`${passive.name} animation ${game.equippedAnimations.includes(number) ? "equipped" : "unequipped"}.`);
+    }
+
+    function saveGame() {
+      try { localStorage.setItem(SAVE_KEY, JSON.stringify(game)); } catch { showToast("Could not save progress in this browser."); }
+    }
+
+    function render() {
+      elements["roll-count"].textContent = format(game.rolls);
+      elements.shards.textContent = format(game.shards);
+      elements.balance.textContent = format(game.balance);
+      elements["run-earned"].textContent = format(game.runEarned);
+      elements.streak.textContent = `${game.streak}×`;
+      const luckBonus = game.upgrades.luck * 0.025;
+      elements["luck-label"].textContent = `SPECIAL CHANCE: ${(1.5 + luckBonus * 100).toFixed(1)}%`;
+
+      const descriptions = {
+        amp: `Payout power +${game.upgrades.amp * 50}% · LV ${game.upgrades.amp}`,
+        luck: `Rare number odds +${(game.upgrades.luck * 2.5).toFixed(1)}% · LV ${game.upgrades.luck}`,
+        echo: `Streak bonus +${game.upgrades.echo * 6}% per roll · LV ${game.upgrades.echo}`,
+        speed: `Cooldown ${(rollCooldown() / 1000).toFixed(1)}s · LV ${game.upgrades.speed}`
+      };
+      for (const name of Object.keys(UPGRADE_BASE_COST)) {
+        const button = elements[`buy-${name}`];
+        const cost = upgradeCost(name);
+        button.textContent = `${format(cost)} ◈`;
+        button.disabled = game.balance < cost || rolling;
+        button.setAttribute("aria-label", `Buy ${UPGRADE_NAMES[name]} for ${format(cost)} sparks`);
+        elements[`${name}-description`].textContent = descriptions[name];
+      }
+
+      const goal = rebirthGoal();
+      const progress = Math.min(100, game.runEarned / goal * 100);
+      const shardsToGain = Math.max(1, Math.floor(game.runEarned / goal));
+      elements["progress-fill"].style.width = `${progress}%`;
+      elements["progress-track"].setAttribute("aria-valuemax", String(goal));
+      elements["progress-track"].setAttribute("aria-valuenow", String(Math.min(goal, game.runEarned)));
+      elements["rebirth-progress"].textContent = `${format(game.runEarned)} / ${format(goal)}`;
+      elements["next-shard"].textContent = `+${format(shardsToGain)} SHARD${shardsToGain === 1 ? "" : "S"}`;
+      elements["rebirth-copy"].innerHTML = `Reach <strong>${format(goal)}</strong> sparks this run to earn ${shardsToGain} Star Shard${shardsToGain === 1 ? "" : "s"}. Rebirth resets sparks and workshop upgrades; Star Shards, pets, and materials stay forever.`;
+      elements["rebirth-button"].textContent = `REBIRTH — ${format(goal)} ◈`;
+      elements["rebirth-button"].disabled = game.runEarned < goal || rolling;
+      elements["preview-seven"].disabled = !game.animationsEnabled;
+      elements["preview-seven"].setAttribute("aria-label", "Preview the Lucky Seven 777 slot-machine animation");
+      elements["preview-hundred"].disabled = !game.animationsEnabled;
+      elements["preview-hundred"].setAttribute("aria-label", "Preview the Century 100 slot-machine animation");
+      elements["preview-777"].disabled = !game.animationsEnabled;
+      elements["preview-thousand"].disabled = !game.animationsEnabled;
+      updateRollButton();
+
+      elements["history-count"].textContent = `LAST ${game.history.length}`;
+      elements["history-list"].replaceChildren();
+      if (game.history.length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "history-empty";
+        empty.textContent = "Your numbers will land here.";
+        elements["history-list"].append(empty);
+      } else {
+        for (const item of game.history) {
+          const badge = document.createElement("span");
+          badge.className = `history-item${item.special ? " special" : ""}`;
+          badge.textContent = item.number;
+          badge.title = `${item.rarity ? `${item.rarity} · ` : ""}${item.effect}`;
+          elements["history-list"].append(badge);
+        }
+      }
+      renderAnimationList();
+      renderPetShop();
+      renderMaterials();
+      updateAnimationState();
+      saveGame();
+    }
+
+    function showToast(message) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => elements.toast.classList.remove("show"), 2300);
+    }
+
+    function dismissScreenEvent() {
+      clearTimeout(screenEventTimer);
+      elements["screen-event"].classList.remove("active");
+      elements["screen-event"].setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      elements["result-number"].focus();
+    }
+
+    function triggerScreenEvent(number) {
+      const event = SPECIAL_BY_NUMBER.get(number);
+      if (!event || !game.animationsEnabled) return;
+
+      const screen = elements["screen-event"];
+      screen.className = `screen-event event-${number} active`;
+      screen.setAttribute("aria-hidden", "false");
+      screen.setAttribute("aria-label", `${number} ${event.kicker}: ${event.eventTitle}`);
+      document.body.style.overflow = "hidden";
+      elements["event-content"].replaceChildren();
+      elements["event-particles"].replaceChildren();
+      const particleCount = number === 777 ? 64 : number === 1000 ? 48 : 28;
+      for (let particleIndex = 0; particleIndex < particleCount; particleIndex += 1) {
+        const particle = document.createElement("span");
+        const [particleX, particleY] = EVENT_PARTICLE_VECTORS[particleIndex % EVENT_PARTICLE_VECTORS.length];
+        particle.className = "event-particle";
+        particle.style.setProperty("--particle-x", `${particleX}vw`);
+        particle.style.setProperty("--particle-y", `${particleY}vh`);
+        particle.style.setProperty("--particle-size", `${12 + particleIndex % 5 * 5}px`);
+        particle.textContent = number === 777 ? (particleIndex % 3 === 0 ? "✦" : "✧") : "✦";
+        particle.style.animationDelay = `${particleIndex % 5 * 0.035}s`;
+        elements["event-particles"].append(particle);
+      }
+
+      const kicker = document.createElement("div");
+      kicker.className = "event-kicker";
+      kicker.textContent = event.kicker;
+      const title = document.createElement("h2");
+      title.className = "event-title";
+      title.textContent = event.eventTitle;
+      const description = document.createElement("p");
+      description.className = "event-description";
+      description.textContent = event.description;
+      elements["event-content"].append(kicker, title);
+
+      if (event.digits) {
+        const finalDigits = event.digits;
+        const machine = document.createElement("div");
+        machine.className = "slot-machine";
+        machine.setAttribute("role", "img");
+        const finalRoll = finalDigits.join("");
+        machine.setAttribute("aria-label", `${finalDigits.length} slot reels spin and land on ${finalRoll}`);
+        const label = document.createElement("div");
+        label.className = "slot-brand";
+        label.textContent = number === 777 ? "ODDITY GRAND · GOLDEN JACKPOT" : number === 1000 ? "ODDITY GRAND · DIVINE REELS" : "ODDITY GRAND · CENTURY REELS";
+        const reels = document.createElement("div");
+        reels.className = "slot-reels";
+        reels.style.gridTemplateColumns = `repeat(${finalDigits.length}, minmax(0, 1fr))`;
+        reels.setAttribute("aria-hidden", "true");
+        for (let reelIndex = 0; reelIndex < finalDigits.length; reelIndex += 1) {
+          const window = document.createElement("div");
+          window.className = "slot-window";
+          const strip = document.createElement("div");
+          strip.className = "slot-strip";
+          const symbols = [...SLOT_REEL_RUNUP[reelIndex % SLOT_REEL_RUNUP.length], finalDigits[reelIndex]];
+          for (const symbol of symbols) {
+            const digit = document.createElement("span");
+            digit.textContent = symbol;
+            strip.append(digit);
+          }
+          window.append(strip);
+          reels.append(window);
+        }
+        const footer = document.createElement("div");
+        footer.className = "slot-footer";
+        footer.textContent = number === 777 ? "777 · GOLD RAIN · JACKPOT" : `${finalDigits.join(" · ")} · ${number === 1000 ? "DIVINE PAYOUT" : "MILESTONE PAYOUT"}`;
+        machine.append(label, reels, footer);
+        elements["event-content"].append(machine, description);
+      } else {
+        const result = document.createElement("div");
+        result.className = `event-number ${event.className}`;
+        result.textContent = number;
+        elements["event-content"].append(result, description);
+      }
+
+      clearTimeout(screenEventTimer);
+      screenEventTimer = setTimeout(dismissScreenEvent, 4600);
+      elements["event-close"].focus();
+    }
+
+    function rollNumber() {
+      const luckChance = Math.min(0.45, game.upgrades.luck * 0.025);
+      if (Math.random() < luckChance) {
+        return SPECIAL_ROLLS[Math.floor(Math.random() * SPECIAL_ROLLS.length)].number;
+      }
+      return Math.floor(Math.random() * 1000) + 1;
+    }
+
+    function resolveEffect(number) {
+      const rarity = RARITIES.find((tier) => number >= tier.min && number <= tier.max);
+      const special = SPECIAL_BY_NUMBER.get(number);
+      return {
+        rarity,
+        title: special?.name.toUpperCase() ?? rarity.name.toUpperCase(),
+        text: special?.description ?? `${rarity.name} roll. ${rarity.effect}.`,
+        factor: rarity.factor * (special?.factor ?? 1),
+        bonus: special?.bonus ?? 0,
+        className: special?.className ?? "",
+        special
+      };
+    }
+
+    function roll() {
+      if (rolling || cooldownRemaining() > 0) return;
+      rolling = true;
+      game.lastRollAt = Date.now();
+      updateRollButton();
+      saveGame();
+      elements["result-number"].className = game.animationsEnabled ? "result-number rolling" : "result-number";
+      elements["result-caption"].className = "result-caption";
+      elements["result-caption"].textContent = "The machine is thinking...";
+      const number = rollNumber();
+      const effect = resolveEffect(number);
+      const wasBig = number >= 500;
+      game.streak = wasBig ? game.streak + 1 : 0;
+      const combo = 1 + Math.min(game.streak, 10) * currentStreakBonus();
+      const basePayout = Math.floor(number * multiplier() * combo * effect.factor) + effect.bonus;
+      const payout = Math.max(1, basePayout);
+
+      setTimeout(() => {
+        const numberEl = elements["result-number"];
+        const justUnlocked = SPECIALS.has(number) && !game.discoveredNumbers.includes(number);
+        if (justUnlocked) game.discoveredNumbers.push(number);
+        displayedNumber = number;
+        const passive = ANIMATION_PASSIVES.find((item) => item.number === number);
+        const passiveClass = game.animationsEnabled && game.equippedAnimations.includes(number) ? passive?.className ?? "" : "";
+        numberEl.textContent = number;
+        numberEl.className = `result-number ${effect.className} ${passiveClass}`.trim();
+        const rollName = effect.special ? `${effect.rarity.name.toUpperCase()} · ${effect.title}` : effect.title;
+        elements["result-caption"].textContent = `${rollName} · +${format(payout)} SPARKS`;
+        elements["result-caption"].className = `result-caption${SPECIALS.has(number) || effect.rarity.name === "Mythic" ? " special" : ""}`;
+        game.balance += payout;
+        game.runEarned += payout;
+        game.totalEarned += payout;
+        game.rolls += 1;
+        game.history.unshift({ number, special: SPECIALS.has(number), rarity: effect.rarity.name, effect: effect.title });
+        game.history = game.history.slice(0, 10);
+        rolling = false;
+        elements["roll-button"].disabled = false;
+        render();
+        if (justUnlocked) showToast(`${passive.name} passive unlocked. Equip it from the Roll Index.`);
+        else if (SPECIALS.has(number)) showToast(effect.text);
+        if (SPECIALS.has(number)) triggerScreenEvent(number);
+      }, 430);
+    }
+
+    function buyUpgrade(name) {
+      const cost = upgradeCost(name);
+      if (game.balance < cost || rolling) return;
+      game.balance -= cost;
+      game.upgrades[name] += 1;
+      render();
+      showToast(`${UPGRADE_NAMES[name]} upgraded to level ${game.upgrades[name]}.`);
+    }
+
+    function weightedPick(items) {
+      const totalWeight = items.reduce((total, item) => total + item.weight, 0);
+      let ticket = Math.random() * totalWeight;
+      for (const item of items) {
+        ticket -= item.weight;
+        if (ticket < 0) return item;
+      }
+      return items.at(-1);
+    }
+
+    function rollShopOffer(type) {
+      if (rolling) return;
+      const isPet = type === "pet";
+      const items = isPet ? PETS : MATERIALS;
+      const owned = isPet ? game.ownedPets : game.ownedMaterials;
+      const offerKey = isPet ? "petOfferId" : "materialOfferId";
+      const cost = isPet ? PET_ROLL_COST : MATERIAL_ROLL_COST;
+      if (game[offerKey] || game.balance < cost) return;
+      const available = items.filter((item) => !owned.includes(item.id));
+      if (!available.length) return;
+      game.balance -= cost;
+      game[offerKey] = weightedPick(available).id;
+      render();
+      const offeredItem = items.find((item) => item.id === game[offerKey]);
+      showToast(`${offeredItem.tier} ${isPet ? "pet" : "material"} rolled. Keep it or pass.`);
+    }
+
+    function keepOffer(type) {
+      if (rolling) return;
+      const isPet = type === "pet";
+      const offerKey = isPet ? "petOfferId" : "materialOfferId";
+      const item = (isPet ? PETS : MATERIALS).find((entry) => entry.id === game[offerKey]);
+      const owned = isPet ? game.ownedPets : game.ownedMaterials;
+      if (!item || owned.includes(item.id) || game.balance < item.keepCost) return;
+      game.balance -= item.keepCost;
+      owned.push(item.id);
+      if (isPet) {
+        if (game.equippedPets.length < 2) game.equippedPets.push(item.id);
+      } else {
+        game.equippedMaterial = item.id;
+      }
+      game[offerKey] = null;
+      render();
+      showToast(`${item.name} kept${isPet && !game.equippedPets.includes(item.id) ? " in your pet collection" : " and equipped"}.`);
+    }
+
+    function passOffer(type) {
+      if (rolling) return;
+      const offerKey = type === "pet" ? "petOfferId" : "materialOfferId";
+      if (!game[offerKey]) return;
+      game[offerKey] = null;
+      render();
+      showToast("Offer passed. The roll fee is not refunded.");
+    }
+
+    function togglePet(petId) {
+      if (rolling || !game.ownedPets.includes(petId)) return;
+      if (game.equippedPets.includes(petId)) {
+        game.equippedPets = game.equippedPets.filter((equippedId) => equippedId !== petId);
+      } else {
+        if (game.equippedPets.length >= 2) return;
+        game.equippedPets.push(petId);
+      }
+      render();
+    }
+
+    function equipMaterial(materialId) {
+      if (rolling || !game.ownedMaterials.includes(materialId)) return;
+      game.equippedMaterial = materialId;
+      render();
+      showToast(`${MATERIALS.find((item) => item.id === materialId).name} equipped.`);
+    }
+
+    function rebirth() {
+      const goal = rebirthGoal();
+      if (game.runEarned < goal || rolling) return;
+      const earnedShards = Math.max(1, Math.floor(game.runEarned / goal));
+      if (!window.confirm(`Rebirth now for ${earnedShards} Star Shard${earnedShards === 1 ? "" : "s"}? Sparks and workshop upgrades reset; pets and materials stay.`)) return;
+      game.shards += earnedShards;
+      game.rebirths += 1;
+      game.balance = 0;
+      game.runEarned = 0;
+      game.streak = 0;
+      game.upgrades = { amp: 0, luck: 0, echo: 0, speed: 0 };
+      displayedNumber = null;
+      elements["result-number"].textContent = "?";
+      elements["result-number"].className = "result-number";
+      elements["result-caption"].textContent = "A fresh beginning.";
+      render();
+      showToast(`Reborn. +${earnedShards} Star Shard${earnedShards === 1 ? "" : "s"} · +25% permanent power each.`);
+    }
+
+    elements["roll-button"].addEventListener("click", roll);
+    for (const name of Object.keys(UPGRADE_BASE_COST)) {
+      elements[`buy-${name}`].addEventListener("click", () => buyUpgrade(name));
+    }
+    elements["rebirth-button"].addEventListener("click", rebirth);
+    elements["roll-pet"].addEventListener("click", () => rollShopOffer("pet"));
+    elements["roll-material"].addEventListener("click", () => rollShopOffer("material"));
+    elements["event-close"].addEventListener("click", dismissScreenEvent);
+    elements["preview-seven"].addEventListener("click", () => triggerScreenEvent(7));
+    elements["preview-hundred"].addEventListener("click", () => triggerScreenEvent(100));
+    elements["preview-777"].addEventListener("click", () => triggerScreenEvent(777));
+    elements["preview-thousand"].addEventListener("click", () => triggerScreenEvent(1000));
+    elements["screen-event"].addEventListener("click", (event) => {
+      if (event.target === elements["screen-event"]) dismissScreenEvent();
+    });
+    elements["animations-toggle"].addEventListener("change", () => {
+      game.animationsEnabled = elements["animations-toggle"].checked;
+      render();
+      showToast(`Number animations ${game.animationsEnabled ? "enabled" : "disabled"}.`);
+    });
+    setInterval(updateRollButton, 100);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && elements["screen-event"].classList.contains("active")) {
+        dismissScreenEvent();
+        return;
+      }
+      if (event.code === "Space" && !elements["screen-event"].classList.contains("active") && !event.repeat && !["BUTTON", "INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        event.preventDefault();
+        roll();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
