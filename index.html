@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brawl Island - Rogue Dungeon</title>
+  <title>Brawl Island - Sans & Gaster Blaster Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,7 +13,7 @@
     }
 
     body {
-      background-color: #08090c;
+      background-color: #050608;
       color: #ffffff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
@@ -28,15 +28,15 @@
       position: relative;
       width: 900px;
       height: 650px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 0 45px rgba(0, 0, 0, 0.95);
       border: 3px solid #2d3748;
       border-radius: 12px;
       overflow: hidden;
-      background: #11141d;
+      background: #0f121a;
     }
 
     canvas {
-      background: radial-gradient(circle, #1a202c 0%, #0d1117 100%);
+      background: radial-gradient(circle, #1a202c 0%, #080a0f 100%);
       display: block;
     }
 
@@ -53,7 +53,7 @@
     }
 
     .hud-box {
-      background: rgba(13, 17, 23, 0.88);
+      background: rgba(10, 13, 20, 0.9);
       backdrop-filter: blur(6px);
       padding: 10px 16px;
       border-radius: 8px;
@@ -114,7 +114,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(8, 10, 15, 0.92);
+      background: rgba(5, 7, 12, 0.94);
       backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
@@ -395,7 +395,7 @@
       <div id="card-projectile" class="starter-card" onclick="selectWeapon('projectile')">
         <div class="starter-icon">🏹</div>
         <div class="card-title">Ranger Bow</div>
-        <div class="card-desc">Fires arrows from distance. Slightly nerfed speed and damage balance.</div>
+        <div class="card-desc">Fires arrows from distance. Balanced projectile combat.</div>
       </div>
     </div>
 
@@ -791,12 +791,13 @@
         this.radius = 14;
         this.hp = 24 * scale;
         this.maxHp = this.hp;
-        this.speed = 1.6;
+        this.speed = 1.5;
         this.damage = 8 * scale;
         this.color = '#48bb78';
         this.goldReward = 8;
         this.xpReward = 12;
-        this.shoots = false;
+        this.leapTimer = 120;
+        this.isLeaping = false;
       } else if (type === 'ranger') {
         this.radius = 15;
         this.hp = 40 * scale;
@@ -806,31 +807,37 @@
         this.color = '#ed8936';
         this.goldReward = 15;
         this.xpReward = 20;
-        this.shoots = true;
-        this.shootTimer = 100;
-      } else if (type === 'boss_golem') {
-        this.radius = 38;
-        this.hp = 320 * scale;
+        this.shootTimer = 90;
+      } else if (type === 'goblin_charger') {
+        this.radius = 16;
+        this.hp = 55 * scale;
         this.maxHp = this.hp;
-        this.speed = 0.95;
-        this.damage = 20 * scale;
+        this.speed = 2.4;
+        this.damage = 14 * scale;
+        this.color = '#e53e3e';
+        this.goldReward = 20;
+        this.xpReward = 25;
+      } else if (type === 'boss_golem') {
+        this.radius = 40;
+        this.hp = 400 * scale;
+        this.maxHp = this.hp;
+        this.speed = 0.85;
+        this.damage = 22 * scale;
         this.color = '#9f7aea';
-        this.goldReward = 120;
-        this.xpReward = 150;
-        this.shoots = true;
-        this.shootTimer = 45;
+        this.goldReward = 150;
+        this.xpReward = 180;
+        this.slamTimer = 180;
       } else if (type === 'sans_boss') {
         this.radius = 28;
-        this.hp = 1200 * scale;
+        this.hp = 1800 * scale;
         this.maxHp = this.hp;
-        this.speed = 1.4;
-        this.damage = 18 * scale;
+        this.speed = 1.8;
+        this.damage = 16 * scale;
         this.color = '#e2e8f0';
-        this.goldReward = 500;
-        this.xpReward = 600;
-        this.shoots = true;
-        this.shootTimer = 15;
-        this.sansPatternTimer = 0;
+        this.goldReward = 800;
+        this.xpReward = 1000;
+        this.phaseTimer = 0;
+        this.attackCycle = 0;
       }
     }
 
@@ -862,58 +869,229 @@
       const angle = Math.atan2(player.y - this.y, player.x - this.x);
       const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
 
-      if (this.type === 'ranger' && distToPlayer < 180) {
-        this.x -= Math.cos(angle) * (this.speed * 0.5);
-        this.y -= Math.sin(angle) * (this.speed * 0.5);
-      } else {
+      if (this.type === 'slime') {
+        this.leapTimer--;
+        if (this.leapTimer <= 0) {
+          this.isLeaping = true;
+          this.x += Math.cos(angle) * 80;
+          this.y += Math.sin(angle) * 80;
+          this.leapTimer = 140;
+        } else {
+          this.x += Math.cos(angle) * this.speed;
+          this.y += Math.sin(angle) * this.speed;
+        }
+      } else if (this.type === 'ranger') {
+        if (distToPlayer < 190) {
+          this.x -= Math.cos(angle) * (this.speed * 0.7);
+          this.y -= Math.sin(angle) * (this.speed * 0.7);
+        } else {
+          this.x += Math.cos(angle) * (this.speed * 0.4);
+          this.y += Math.sin(angle) * (this.speed * 0.4);
+        }
+
+        this.shootTimer--;
+        if (this.shootTimer <= 0) {
+          [-0.2, 0, 0.2].forEach(off => {
+            enemyProjectiles.push(new EnemyOrb(this.x, this.y, angle + off, 4.2, this.damage, '#ed8936', 5));
+          });
+          this.shootTimer = 110;
+        }
+      } else if (this.type === 'goblin_charger') {
         this.x += Math.cos(angle) * this.speed;
         this.y += Math.sin(angle) * this.speed;
+      } else if (this.type === 'boss_golem') {
+        this.x += Math.cos(angle) * this.speed;
+        this.y += Math.sin(angle) * this.speed;
+
+        this.slamTimer--;
+        if (this.slamTimer <= 0) {
+          shockwaves.push(new ShockwaveRing(this.x, this.y, this.damage * 1.2));
+          this.slamTimer = 160;
+        }
+      } else if (this.type === 'sans_boss') {
+        this.x += Math.cos(angle) * (this.speed * 0.5);
+        this.y += Math.sin(angle) * (this.speed * 0.5);
+
+        this.phaseTimer++;
+        if (this.phaseTimer % 120 === 0) {
+          this.executeSansAttack(angle);
+        }
       }
 
       if (distToPlayer <= player.radius + this.radius) {
-        player.takeDamage(this.damage * 0.03);
-      }
-
-      if (this.shoots) {
-        this.shootTimer--;
-        if (this.shootTimer <= 0) {
-          this.shootPattern(angle);
-        }
+        player.takeDamage(this.damage * 0.035);
       }
     }
 
-    shootPattern(angle) {
-      if (this.type === 'boss_golem') {
-        [-0.35, 0, 0.35].forEach(off => {
-          enemyProjectiles.push(new EnemyOrb(this.x, this.y, angle + off, 4.2, this.damage * 0.7, '#9f7aea', 7));
-        });
-        this.shootTimer = 55;
-      } else if (this.type === 'sans_boss') {
-        this.sansPatternTimer++;
-        const p = this.sansPatternTimer % 4;
+    executeSansAttack(angle) {
+      this.attackCycle = (this.attackCycle + 1) % 3;
 
-        if (p === 0) {
-          for (let i = 0; i < 8; i++) {
-            const a = (Math.PI * 2 / 8) * i;
-            enemyProjectiles.push(new EnemyOrb(this.x, this.y, a, 3.8, this.damage * 0.5, '#4299e1', 6));
+      if (this.attackCycle === 0) {
+        const bx = player.x + (Math.random() * 200 - 100);
+        const by = player.y < 325 ? 80 : 570;
+        const beamAngle = Math.atan2(player.y - by, player.x - bx);
+        gasterBlasters.push(new GasterBlaster(bx, by, beamAngle, this.damage * 2.2));
+      } else if (this.attackCycle === 1) {
+        const gapY = 100 + Math.random() * 450;
+        for (let y = 30; y < canvas.height - 30; y += 22) {
+          if (Math.abs(y - gapY) > 55) {
+            boneWalls.push(new BoneWall(canvas.width, y, -4.5, this.damage * 0.8));
           }
-        } else if (p === 1 || p === 2) {
-          enemyProjectiles.push(new EnemyOrb(this.x, this.y, angle + (Math.random() * 0.4 - 0.2), 6.5, this.damage * 0.6, '#ffffff', 8));
-        } else if (p === 3) {
-          [-0.2, 0, 0.2].forEach(off => {
-            enemyProjectiles.push(new EnemyOrb(this.x, this.y, angle + off, 5.0, this.damage * 0.6, '#ecc94b', 7));
-          });
         }
-        this.shootTimer = 22;
-      } else {
-        enemyProjectiles.push(new EnemyOrb(this.x, this.y, angle, 4.0, this.damage, '#ed8936', 5));
-        this.shootTimer = 110;
+      } else if (this.attackCycle === 2) {
+        this.x = 100 + Math.random() * 700;
+        this.y = 100 + Math.random() * 450;
+        for (let i = 0; i < 12; i++) {
+          const a = (Math.PI * 2 / 12) * i;
+          enemyProjectiles.push(new EnemyOrb(this.x, this.y, a, 4.5, this.damage * 0.7, '#4299e1', 7));
+        }
       }
     }
 
     takeDamage(amount, isCrit) {
+      if (this.type === 'sans_boss' && Math.random() < 0.25) {
+        this.x = Math.max(50, Math.min(canvas.width - 50, this.x + (Math.random() * 200 - 100)));
+        this.y = Math.max(50, Math.min(canvas.height - 50, this.y + (Math.random() * 200 - 100)));
+        damageNumbers.push(new DamageNumber(this.x, this.y - 15, 'MISS!', '#63b3ed'));
+        return;
+      }
       this.hp -= amount;
       damageNumbers.push(new DamageNumber(this.x, this.y - 10, Math.round(amount), isCrit ? '#f6e05e' : '#ffffff'));
+    }
+  }
+
+  class GasterBlaster {
+    constructor(x, y, angle, damage) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.damage = damage;
+      this.chargeTimer = 45;
+      this.beamDuration = 20;
+      this.width = 45;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.fillRect(-6, -6, 4, 8);
+      ctx.fillRect(2, -6, 4, 8);
+
+      if (this.chargeTimer > 0) {
+        ctx.strokeStyle = 'rgba(229, 62, 62, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(1000, 0);
+        ctx.stroke();
+      } else if (this.beamDuration > 0) {
+        ctx.fillStyle = '#63b3ed';
+        ctx.fillRect(0, -this.width / 2, 1000, this.width);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, -this.width / 4, 1000, this.width / 2);
+      }
+
+      ctx.restore();
+    }
+
+    update() {
+      if (this.chargeTimer > 0) {
+        this.chargeTimer--;
+        return true;
+      }
+
+      if (this.beamDuration > 0) {
+        this.beamDuration--;
+
+        const cos = Math.cos(this.angle);
+        const sin = Math.sin(this.angle);
+        const px = player.x - this.x;
+        const py = player.y - this.y;
+        const proj = px * cos + py * sin;
+        const perp = -px * sin + py * cos;
+
+        if (proj > 0 && Math.abs(perp) < this.width / 2 + player.radius) {
+          player.takeDamage(this.damage * 0.15);
+        }
+
+        return this.beamDuration > 0;
+      }
+
+      return false;
+    }
+  }
+
+  class BoneWall {
+    constructor(x, y, vx, damage) {
+      this.x = x;
+      this.y = y;
+      this.vx = vx;
+      this.damage = damage;
+      this.width = 10;
+      this.height = 18;
+    }
+
+    draw() {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y - this.height / 2, 6, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y + this.height / 2, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    update() {
+      this.x += this.vx;
+
+      if (Math.abs(player.x - this.x) < this.width / 2 + player.radius &&
+          Math.abs(player.y - this.y) < this.height / 2 + player.radius) {
+        player.takeDamage(this.damage);
+        return false;
+      }
+
+      return this.x > -20;
+    }
+  }
+
+  class ShockwaveRing {
+    constructor(x, y, damage) {
+      this.x = x;
+      this.y = y;
+      this.radius = 10;
+      this.maxRadius = 180;
+      this.damage = damage;
+      this.hasHit = false;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(159, 122, 234, 0.7)';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    update() {
+      this.radius += 4;
+
+      if (!this.hasHit) {
+        const dist = Math.hypot(player.x - this.x, player.y - this.y);
+        if (Math.abs(dist - this.radius) < player.radius + 6) {
+          player.takeDamage(this.damage);
+          this.hasHit = true;
+        }
+      }
+
+      return this.radius < this.maxRadius;
     }
   }
 
@@ -985,6 +1163,9 @@
   let damageNumbers = [];
   let slashVisuals = [];
   let explosions = [];
+  let gasterBlasters = [];
+  let boneWalls = [];
+  let shockwaves = [];
 
   function setDifficulty(diff) {
     difficulty = diff;
@@ -1032,6 +1213,9 @@
     enemies = [];
     playerProjectiles = [];
     enemyProjectiles = [];
+    gasterBlasters = [];
+    boneWalls = [];
+    shockwaves = [];
 
     const isSansFloor = player.floor % 100 === 0;
     const isMilestoneFloor = player.floor % 25 === 0 && !isSansFloor;
@@ -1043,7 +1227,11 @@
     } else {
       const count = 3 + Math.floor(player.floor * 1.5);
       for (let i = 0; i < count; i++) {
-        const type = Math.random() > 0.45 ? 'ranger' : 'slime';
+        const rand = Math.random();
+        let type = 'slime';
+        if (rand > 0.6) type = 'ranger';
+        else if (rand > 0.35) type = 'goblin_charger';
+
         const rx = 520 + Math.random() * 330;
         const ry = 60 + Math.random() * 520;
         enemies.push(new Enemy(rx, ry, type, player.floor));
@@ -1088,7 +1276,7 @@
 
     const subTitle = document.getElementById('upgrade-subtitle');
     if (isSansNext) {
-      subTitle.innerText = "WARNING: Sans megaboss awaiting on Floor " + (player.floor + 1) + "! Prepare your build!";
+      subTitle.innerText = "WARNING: SANS GOD-BOSS AWAITING ON FLOOR " + (player.floor + 1) + "! PREPARE YOUR DODGES!";
     } else if (isMilestoneNext) {
       subTitle.innerText = "Milestone Golem Boss ahead on Floor " + (player.floor + 1) + "! Choose wisely.";
     } else {
@@ -1218,6 +1406,9 @@
 
       playerProjectiles = playerProjectiles.filter(p => p.update());
       enemyProjectiles = enemyProjectiles.filter(p => p.update());
+      gasterBlasters = gasterBlasters.filter(gb => gb.update());
+      boneWalls = boneWalls.filter(bw => bw.update());
+      shockwaves = shockwaves.filter(sw => sw.update());
 
       damageNumbers = damageNumbers.filter(d => d.update());
 
@@ -1235,6 +1426,9 @@
     enemies.forEach(e => e.draw());
     playerProjectiles.forEach(p => p.draw());
     enemyProjectiles.forEach(p => p.draw());
+    boneWalls.forEach(bw => bw.draw());
+    gasterBlasters.forEach(gb => gb.draw());
+    shockwaves.forEach(sw => sw.draw());
     damageNumbers.forEach(d => d.draw());
 
     explosions.forEach(ex => {
@@ -1260,6 +1454,12 @@
 
     requestAnimationFrame(gameLoop);
   }
+
+  loadSave();
+  gameLoop();
+</script>
+</body>
+</html>
 
   loadSave();
   gameLoop();
