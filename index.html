@@ -1,1 +1,1019 @@
-new link: https://rb.gy/ods9co
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brawl Island - 2D Dungeon Quest</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: #0d0e12;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 900px;
+      height: 650px;
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+      border: 3px solid #2a2e3d;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #141721;
+    }
+
+    canvas {
+      background: radial-gradient(circle, #1a202c 0%, #0f131d 100%);
+      display: block;
+    }
+
+    #ui-hud {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-box {
+      background: rgba(15, 19, 29, 0.85);
+      backdrop-filter: blur(5px);
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #2d3748;
+      font-size: 14px;
+      font-weight: bold;
+      min-width: 220px;
+    }
+
+    .bar-container {
+      position: relative;
+      width: 100%;
+      height: 14px;
+      background: #1a202c;
+      border-radius: 7px;
+      overflow: hidden;
+      margin-top: 6px;
+      border: 1px solid #2d3748;
+    }
+
+    .bar-fill-hp {
+      height: 100%;
+      background: linear-gradient(90deg, #e53e3e, #f56565);
+      width: 100%;
+      transition: width 0.15s ease-out;
+    }
+
+    .bar-fill-xp {
+      height: 100%;
+      background: linear-gradient(90deg, #3182ce, #4299e1);
+      width: 0%;
+      transition: width 0.15s ease-out;
+    }
+
+    .bar-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 9px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 0 3px #000;
+    }
+
+    .stat-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #2d3748;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 12, 18, 0.88);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-title {
+      font-size: 28px;
+      color: #ecc94b;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(236, 201, 75, 0.4);
+    }
+
+    .modal-subtitle {
+      font-size: 14px;
+      color: #a0aec0;
+      margin-bottom: 24px;
+    }
+
+    .starter-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .starter-card {
+      width: 220px;
+      background: #1a202c;
+      border: 2px solid #4a5568;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .starter-card:hover {
+      border-color: #ecc94b;
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(236, 201, 75, 0.2);
+    }
+
+    .starter-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .card-container {
+      display: flex;
+      gap: 16px;
+    }
+
+    .upgrade-card {
+      width: 230px;
+      background: #1a202c;
+      border: 2px solid #3182ce;
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .upgrade-card:hover {
+      border-color: #63b3ed;
+      transform: translateY(-6px);
+      box-shadow: 0 10px 25px rgba(49, 130, 206, 0.3);
+      background: #2d3748;
+    }
+
+    .card-icon {
+      font-size: 38px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: #a0aec0;
+      line-height: 1.4;
+      flex-grow: 1;
+    }
+
+    .card-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 8px 0;
+      background: #3182ce;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .card-btn:hover {
+      background: #4299e1;
+    }
+
+    .btn-restart {
+      padding: 12px 32px;
+      background: #e53e3e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s;
+    }
+
+    .btn-restart:hover {
+      background: #c53030;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <canvas id="gameCanvas" width="900" height="650"></canvas>
+
+  <div id="ui-hud">
+    <div class="hud-box">
+      <div style="display: flex; justify-content: space-between;">
+        <span>Hero Lvl <span id="lbl-level">1</span></span>
+        <span id="lbl-weapon-type" style="color:#ecc94b; text-transform: capitalize;">Melee</span>
+      </div>
+      <div class="bar-container">
+        <div id="hp-bar" class="bar-fill-hp"></div>
+        <div id="hp-text" class="bar-text">100 / 100 HP</div>
+      </div>
+      <div class="bar-container">
+        <div id="xp-bar" class="bar-fill-xp"></div>
+        <div id="xp-text" class="bar-text">0 / 50 XP</div>
+      </div>
+    </div>
+    <div class="hud-box" style="text-align: right; min-width: 180px;">
+      <div>Dungeon Floor: <span id="lbl-floor" style="color:#ecc94b;">1</span></div>
+      <div>Gold: <span id="lbl-gold" style="color:#f6e05e;">0</span></div>
+      <div class="stat-badge">WASD / Arrows to move</div>
+    </div>
+  </div>
+
+  <div id="starter-modal" class="modal-overlay active">
+    <h2 class="modal-title">Choose Your Starting Class</h2>
+    <div class="modal-subtitle">Select your weapon combat style to enter Brawl Island</div>
+    <div class="starter-container">
+      <div class="starter-card" onclick="selectStarterWeapon('sword')">
+        <div class="starter-icon">⚔️</div>
+        <div class="card-title">Warrior Blade</div>
+        <div class="card-desc">Automatic close-range slashes that hit all nearby enemies in an arc.</div>
+      </div>
+      <div class="starter-card" onclick="selectStarterWeapon('projectile')">
+        <div class="starter-icon">🏹</div>
+        <div class="card-title">Ranger Crossbow</div>
+        <div class="card-desc">Fires rapid automatic projectiles targeting the nearest enemy from distance.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="upgrade-modal" class="modal-overlay">
+    <h2 class="modal-title">Floor Cleared!</h2>
+    <div class="modal-subtitle">Choose 1 perk or weapon upgrade to advance to the next floor</div>
+    <div id="card-container" class="card-container"></div>
+  </div>
+
+  <div id="gameover-modal" class="modal-overlay">
+    <h2 class="modal-title" style="color: #e53e3e;">Defeated in Dungeon!</h2>
+    <div class="modal-subtitle" id="gameover-stats">You reached Floor 1</div>
+    <button class="btn-restart" onclick="restartGame()">Try Again</button>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const keys = {};
+  window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+  window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+  let isGamePaused = true;
+  let gameStarted = false;
+
+  const UPGRADE_POOL = {
+    sword_range: { id: 'sword_range', weapon: 'sword', icon: '🗡️', title: 'Blade Reach', desc: '+25% Swing Arc Radius & Width' },
+    sword_double: { id: 'sword_double', weapon: 'sword', icon: '⚔️', title: 'Double Slash', desc: 'Adds a second rapid trailing slash per strike' },
+    sword_whirlwind: { id: 'sword_whirlwind', weapon: 'sword', icon: '🌀', title: 'Whirlwind Slash', desc: 'Slashes hit all 360 degrees around you' },
+    sword_lifesteal: { id: 'sword_lifesteal', weapon: 'sword', icon: '🩸', title: 'Vampiric Blade', desc: 'Slashes heal 3% of max HP on hit' },
+    sword_speed: { id: 'sword_speed', weapon: 'sword', icon: '⚡', title: 'Furious Swing', desc: '+30% Attack Rate for Sword' },
+
+    proj_multishot: { id: 'proj_multishot', weapon: 'projectile', icon: '🏹', title: 'Multishot', desc: '+1 Extra projectile fired per volley' },
+    proj_pierce: { id: 'proj_pierce', weapon: 'projectile', icon: '🎯', title: 'Piercing Bolts', desc: 'Projectiles pass through 2 additional enemies' },
+    proj_ricochet: { id: 'proj_ricochet', weapon: 'projectile', icon: '🛡️', title: 'Ricochet', desc: 'Projectiles bounce off screen boundary walls' },
+    proj_explosive: { id: 'proj_explosive', weapon: 'projectile', icon: '💥', title: 'Explosive Impact', desc: 'Projectiles explode on hit dealing area damage' },
+    proj_speed: { id: 'proj_speed', weapon: 'projectile', icon: '💨', title: 'Rapid Fire', desc: '+35% Attack Speed & +20% Shot Velocity' },
+
+    gen_hp: { id: 'gen_hp', weapon: 'any', icon: '❤️', title: 'Vitality boost', desc: '+35 Max HP and fully restores health' },
+    gen_regen: { id: 'gen_regen', weapon: 'any', icon: '💖', title: 'Regeneration', desc: 'Passively regenerates 2.5 HP per second' },
+    gen_dmg: { id: 'gen_dmg', weapon: 'any', icon: '💪', title: 'Power Surge', desc: '+20% Damage on all attacks' },
+    gen_crit: { id: 'gen_crit', weapon: 'any', icon: '🎯', title: 'Critical Eye', desc: '+15% Critical Hit Chance (2x Damage)' },
+    gen_speed: { id: 'gen_speed', weapon: 'any', icon: '👟', title: 'Swift Step', desc: '+15% Player Movement Speed' }
+  };
+
+  const player = {
+    x: 450,
+    y: 325,
+    radius: 16,
+    speed: 3.8,
+    hp: 100,
+    maxHp: 100,
+    regenRate: 0,
+    level: 1,
+    xp: 0,
+    xpNeeded: 50,
+    gold: 0,
+    floor: 1,
+
+    weaponType: null,
+    baseDamage: 18,
+    damageMult: 1.0,
+    critChance: 0.05,
+    attackCooldown: 0,
+    attackMaxCooldown: 30,
+
+    swordRangeMult: 1.0,
+    hasDoubleSlash: false,
+    hasWhirlwind: false,
+    hasLifesteal: false,
+
+    extraProjectiles: 1,
+    projPierce: 1,
+    hasRicochet: false,
+    hasExplosive: false,
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.weaponType === 'sword' ? '#3182ce' : '#38a169';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius - 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.fill();
+    },
+
+    update() {
+      if (keys['w'] || keys['arrowup']) if (this.y - this.radius > 10) this.y -= this.speed;
+      if (keys['s'] || keys['arrowdown']) if (this.y + this.radius < canvas.height - 10) this.y += this.speed;
+      if (keys['a'] || keys['arrowleft']) if (this.x - this.radius > 10) this.x -= this.speed;
+      if (keys['d'] || keys['arrowright']) if (this.x + this.radius < canvas.width - 10) this.x += this.speed;
+
+      if (this.regenRate > 0 && this.hp < this.maxHp) {
+        this.hp = Math.min(this.maxHp, this.hp + (this.regenRate / 60));
+        updateHUD();
+      }
+
+      if (this.attackCooldown > 0) {
+        this.attackCooldown--;
+      } else {
+        this.autoAttack();
+      }
+    },
+
+    autoAttack() {
+      if (enemies.length === 0) return;
+
+      let closestEnemy = null;
+      let minDist = Infinity;
+      enemies.forEach(e => {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist < minDist) {
+          minDist = dist;
+          closestEnemy = e;
+        }
+      });
+
+      if (!closestEnemy) return;
+
+      const angle = Math.atan2(closestEnemy.y - this.y, closestEnemy.x - this.x);
+
+      if (this.weaponType === 'sword') {
+        const range = 65 * this.swordRangeMult;
+        if (minDist <= range + closestEnemy.radius + 15) {
+          this.executeSwordAttack(angle, range);
+          this.attackCooldown = this.attackMaxCooldown;
+        }
+      } else if (this.weaponType === 'projectile') {
+        this.executeProjectileAttack(angle);
+        this.attackCooldown = this.attackMaxCooldown;
+      }
+    },
+
+    executeSwordAttack(angle, range) {
+      const isCrit = Math.random() < this.critChance;
+      const finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+
+      slashVisuals.push({
+        x: this.x,
+        y: this.y,
+        angle: angle,
+        radius: range,
+        isWhirlwind: this.hasWhirlwind,
+        duration: 12
+      });
+
+      if (this.hasDoubleSlash) {
+        setTimeout(() => {
+          slashVisuals.push({
+            x: this.x,
+            y: this.y,
+            angle: angle,
+            radius: range,
+            isWhirlwind: this.hasWhirlwind,
+            duration: 10
+          });
+          this.damageEnemiesInArc(angle, range, finalDmg * 0.7, isCrit);
+        }, 120);
+      }
+
+      this.damageEnemiesInArc(angle, range, finalDmg, isCrit);
+    },
+
+    damageEnemiesInArc(angle, range, damage, isCrit) {
+      const arcWidth = this.hasWhirlwind ? Math.PI * 2 : (Math.PI / 1.8) * this.swordRangeMult;
+
+      enemies.forEach(e => {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= range + e.radius) {
+          const enemyAngle = Math.atan2(e.y - this.y, e.x - this.x);
+          let diff = Math.abs(angle - enemyAngle);
+          while (diff > Math.PI) diff = Math.PI * 2 - diff;
+
+          if (this.hasWhirlwind || diff <= arcWidth / 2) {
+            e.takeDamage(damage, isCrit);
+            if (this.hasLifesteal) {
+              this.hp = Math.min(this.maxHp, this.hp + (this.maxHp * 0.03));
+              updateHUD();
+            }
+          }
+        }
+      });
+    },
+
+    executeProjectileAttack(angle) {
+      const count = this.extraProjectiles;
+      const spread = 0.18;
+
+      for (let i = 0; i < count; i++) {
+        const offsetAngle = angle + (i - (count - 1) / 2) * spread;
+        const isCrit = Math.random() < this.critChance;
+        const finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+
+        playerProjectiles.push(new PlayerProjectile(
+          this.x,
+          this.y,
+          offsetAngle,
+          finalDmg,
+          isCrit,
+          this.projPierce,
+          this.hasRicochet,
+          this.hasExplosive
+        ));
+      }
+    },
+
+    takeDamage(amount) {
+      this.hp -= amount;
+      damageNumbers.push(new DamageNumber(this.x, this.y - 15, Math.round(amount), '#f56565'));
+      if (this.hp <= 0) {
+        this.hp = 0;
+        triggerGameOver();
+      }
+      updateHUD();
+    },
+
+    gainRewards(xpAmount, goldAmount) {
+      this.gold += goldAmount;
+      this.xp += xpAmount;
+
+      if (this.xp >= this.xpNeeded) {
+        this.level++;
+        this.xp -= this.xpNeeded;
+        this.xpNeeded = Math.floor(this.xpNeeded * 1.5);
+        this.maxHp += 15;
+        this.hp = this.maxHp;
+        this.baseDamage += 3;
+      }
+      updateHUD();
+    }
+  };
+
+  class PlayerProjectile {
+    constructor(x, y, angle, damage, isCrit, pierce, ricochet, explosive) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * 8.5;
+      this.vy = Math.sin(angle) * 8.5;
+      this.radius = 5;
+      this.damage = damage;
+      this.isCrit = isCrit;
+      this.pierce = pierce;
+      this.ricochet = ricochet;
+      this.explosive = explosive;
+      this.hitEnemies = new Set();
+      this.bounced = false;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.isCrit ? '#f6e05e' : '#63b3ed';
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      if (this.ricochet && !this.bounced) {
+        if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
+          this.vx *= -1;
+          this.bounced = true;
+        }
+        if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
+          this.vy *= -1;
+          this.bounced = true;
+        }
+      }
+
+      for (let e of enemies) {
+        if (this.hitEnemies.has(e)) continue;
+
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= this.radius + e.radius) {
+          e.takeDamage(this.damage, this.isCrit);
+          this.hitEnemies.add(e);
+
+          if (this.explosive) {
+            this.triggerExplosion();
+          }
+
+          this.pierce--;
+          if (this.pierce <= 0) return false;
+        }
+      }
+
+      if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+        return false;
+      }
+
+      return true;
+    }
+
+    triggerExplosion() {
+      explosions.push({ x: this.x, y: this.y, radius: 40, maxRadius: 45, life: 10 });
+      enemies.forEach(e => {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= 45 + e.radius) {
+          e.takeDamage(this.damage * 0.5, false);
+        }
+      });
+    }
+  }
+
+  class Enemy {
+    constructor(x, y, type, floor) {
+      this.x = x;
+      this.y = y;
+      this.type = type;
+      const floorMult = 1 + (floor - 1) * 0.25;
+
+      if (type === 'slime') {
+        this.radius = 14;
+        this.hp = 25 * floorMult;
+        this.maxHp = this.hp;
+        this.speed = 1.6;
+        this.damage = 8 * floorMult;
+        this.color = '#48bb78';
+        this.goldReward = 10;
+        this.xpReward = 15;
+        this.shoots = false;
+      } else if (type === 'goblin_ranger') {
+        this.radius = 15;
+        this.hp = 45 * floorMult;
+        this.maxHp = this.hp;
+        this.speed = 1.3;
+        this.damage = 10 * floorMult;
+        this.color = '#ed8936';
+        this.goldReward = 20;
+        this.xpReward = 25;
+        this.shoots = true;
+        this.shootTimer = 90;
+      } else if (type === 'boss_golem') {
+        this.radius = 36;
+        this.hp = 350 * floorMult;
+        this.maxHp = this.hp;
+        this.speed = 0.9;
+        this.damage = 22 * floorMult;
+        this.color = '#9f7aea';
+        this.goldReward = 150;
+        this.xpReward = 180;
+        this.shoots = true;
+        this.shootTimer = 50;
+      }
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#000000';
+      ctx.stroke();
+
+      const barW = this.radius * 2;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 10, barW, 5);
+      ctx.fillStyle = '#e53e3e';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 10, (this.hp / this.maxHp) * barW, 5);
+    }
+
+    update() {
+      const angle = Math.atan2(player.y - this.y, player.x - this.x);
+      const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
+
+      if (this.type === 'goblin_ranger' && distToPlayer < 180) {
+        this.x -= Math.cos(angle) * (this.speed * 0.5);
+        this.y -= Math.sin(angle) * (this.speed * 0.5);
+      } else {
+        this.x += Math.cos(angle) * this.speed;
+        this.y += Math.sin(angle) * this.speed;
+      }
+
+      if (distToPlayer <= player.radius + this.radius) {
+        player.takeDamage(this.damage * 0.03);
+      }
+
+      if (this.shoots) {
+        this.shootTimer--;
+        if (this.shootTimer <= 0) {
+          this.shootProjectile(angle);
+          this.shootTimer = this.type === 'boss_golem' ? 60 : 120;
+        }
+      }
+    }
+
+    shootProjectile(angle) {
+      if (this.type === 'boss_golem') {
+        [-0.3, 0, 0.3].forEach(off => {
+          enemyProjectiles.push(new EnemyProjectile(this.x, this.y, angle + off, 4.5, this.damage * 0.8));
+        });
+      } else {
+        enemyProjectiles.push(new EnemyProjectile(this.x, this.y, angle, 4.0, this.damage));
+      }
+    }
+
+    takeDamage(amount, isCrit) {
+      this.hp -= amount;
+      damageNumbers.push(new DamageNumber(this.x, this.y - 10, Math.round(amount), isCrit ? '#f6e05e' : '#ffffff'));
+    }
+  }
+
+  class EnemyProjectile {
+    constructor(x, y, angle, speed, damage) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.radius = 6;
+      this.damage = damage;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#e53e3e';
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#fff';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      const dist = Math.hypot(player.x - this.x, player.y - this.y);
+      if (dist <= this.radius + player.radius) {
+        player.takeDamage(this.damage);
+        return false;
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
+  class DamageNumber {
+    constructor(x, y, text, color) {
+      this.x = x + (Math.random() * 20 - 10);
+      this.y = y;
+      this.text = text;
+      this.color = color;
+      this.opacity = 1.0;
+      this.life = 30;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.opacity;
+      ctx.fillStyle = this.color;
+      ctx.font = 'bold 14px Segoe UI';
+      ctx.fillText(this.text, this.x, this.y);
+      ctx.restore();
+    }
+
+    update() {
+      this.y -= 0.8;
+      this.life--;
+      this.opacity = this.life / 30;
+      return this.life > 0;
+    }
+  }
+
+  let enemies = [];
+  let playerProjectiles = [];
+  let enemyProjectiles = [];
+  let damageNumbers = [];
+  let slashVisuals = [];
+  let explosions = [];
+
+  function spawnFloorEnemies() {
+    enemies = [];
+    playerProjectiles = [];
+    enemyProjectiles = [];
+
+    const isBossFloor = player.floor % 3 === 0;
+
+    if (isBossFloor) {
+      enemies.push(new Enemy(700, 325, 'boss_golem', player.floor));
+    } else {
+      const enemyCount = 3 + player.floor * 2;
+      for (let i = 0; i < enemyCount; i++) {
+        const type = Math.random() > 0.4 ? 'goblin_ranger' : 'slime';
+        const rx = 550 + Math.random() * 300;
+        const ry = 60 + Math.random() * 520;
+        enemies.push(new Enemy(rx, ry, type, player.floor));
+      }
+    }
+  }
+
+  function selectStarterWeapon(type) {
+    player.weaponType = type;
+
+    if (type === 'sword') {
+      player.attackMaxCooldown = 28;
+      player.baseDamage = 22;
+      document.getElementById('lbl-weapon-type').innerText = 'Warrior Blade';
+    } else {
+      player.attackMaxCooldown = 22;
+      player.baseDamage = 14;
+      document.getElementById('lbl-weapon-type').innerText = 'Ranger Crossbow';
+    }
+
+    document.getElementById('starter-modal').classList.remove('active');
+    isGamePaused = false;
+    gameStarted = true;
+    spawnFloorEnemies();
+    updateHUD();
+  }
+
+  function presentUpgradeChoices() {
+    isGamePaused = true;
+
+    const available = Object.values(UPGRADE_POOL).filter(u => {
+      return u.weapon === 'any' || u.weapon === player.weaponType;
+    });
+
+    const shuffled = available.sort(() => 0.5 - Math.random()).slice(0, 3);
+    const container = document.getElementById('card-container');
+    container.innerHTML = '';
+
+    shuffled.forEach(upgrade => {
+      const card = document.createElement('div');
+      card.className = 'upgrade-card';
+      card.innerHTML = `
+        <div class="card-icon">${upgrade.icon}</div>
+        <div class="card-title">${upgrade.title}</div>
+        <div class="card-desc">${upgrade.desc}</div>
+        <button class="card-btn">Select Perk</button>
+      `;
+
+      card.onclick = () => applyUpgradeChoice(upgrade.id);
+      container.appendChild(card);
+    });
+
+    document.getElementById('upgrade-modal').classList.add('active');
+  }
+
+  function applyUpgradeChoice(upgradeId) {
+    switch (upgradeId) {
+      case 'sword_range':
+        player.swordRangeMult += 0.25;
+        break;
+      case 'sword_double':
+        player.hasDoubleSlash = true;
+        break;
+      case 'sword_whirlwind':
+        player.hasWhirlwind = true;
+        break;
+      case 'sword_lifesteal':
+        player.hasLifesteal = true;
+        break;
+      case 'sword_speed':
+        player.attackMaxCooldown = Math.max(10, Math.floor(player.attackMaxCooldown * 0.7));
+        break;
+
+      case 'proj_multishot':
+        player.extraProjectiles += 1;
+        break;
+      case 'proj_pierce':
+        player.projPierce += 2;
+        break;
+      case 'proj_ricochet':
+        player.hasRicochet = true;
+        break;
+      case 'proj_explosive':
+        player.hasExplosive = true;
+        break;
+      case 'proj_speed':
+        player.attackMaxCooldown = Math.max(8, Math.floor(player.attackMaxCooldown * 0.65));
+        break;
+
+      case 'gen_hp':
+        player.maxHp += 35;
+        player.hp = player.maxHp;
+        break;
+      case 'gen_regen':
+        player.regenRate += 2.5;
+        break;
+      case 'gen_dmg':
+        player.damageMult += 0.2;
+        break;
+      case 'gen_crit':
+        player.critChance += 0.15;
+        break;
+      case 'gen_speed':
+        player.speed += 0.6;
+        break;
+    }
+
+    document.getElementById('upgrade-modal').classList.remove('active');
+
+    player.floor++;
+    player.x = 100;
+    player.y = 325;
+    spawnFloorEnemies();
+    updateHUD();
+    isGamePaused = false;
+  }
+
+  function triggerGameOver() {
+    isGamePaused = true;
+    document.getElementById('gameover-stats').innerText = `You cleared ${player.floor - 1} dungeon floors!`;
+    document.getElementById('gameover-modal').classList.add('active');
+  }
+
+  function restartGame() {
+    document.getElementById('gameover-modal').classList.remove('active');
+
+    player.hp = 100;
+    player.maxHp = 100;
+    player.level = 1;
+    player.xp = 0;
+    player.xpNeeded = 50;
+    player.gold = 0;
+    player.floor = 1;
+    player.regenRate = 0;
+    player.damageMult = 1.0;
+    player.critChance = 0.05;
+    player.speed = 3.8;
+    player.swordRangeMult = 1.0;
+    player.hasDoubleSlash = false;
+    player.hasWhirlwind = false;
+    player.hasLifesteal = false;
+    player.extraProjectiles = 1;
+    player.projPierce = 1;
+    player.hasRicochet = false;
+    player.hasExplosive = false;
+
+    document.getElementById('starter-modal').classList.add('active');
+  }
+
+  function updateHUD() {
+    document.getElementById('lbl-level').innerText = player.level;
+    document.getElementById('lbl-gold').innerText = player.gold;
+    document.getElementById('lbl-floor').innerText = player.floor;
+
+    document.getElementById('hp-bar').style.width = Math.max(0, (player.hp / player.maxHp) * 100) + '%';
+    document.getElementById('hp-text').innerText = `${Math.ceil(player.hp)} / ${player.maxHp} HP`;
+
+    document.getElementById('xp-bar').style.width = Math.min(100, (player.xp / player.xpNeeded) * 100) + '%';
+    document.getElementById('xp-text').innerText = `${player.xp} / ${player.xpNeeded} XP`;
+  }
+
+  function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (gameStarted && !isGamePaused) {
+      player.update();
+
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        e.update();
+        if (e.hp <= 0) {
+          player.gainRewards(e.xpReward, e.goldReward);
+          enemies.splice(i, 1);
+        }
+      }
+
+      if (enemies.length === 0) {
+        presentUpgradeChoices();
+      }
+
+      playerProjectiles = playerProjectiles.filter(p => p.update());
+      enemyProjectiles = enemyProjectiles.filter(p => p.update());
+
+      damageNumbers = damageNumbers.filter(d => d.update());
+
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        explosions[i].life--;
+        if (explosions[i].life <= 0) explosions.splice(i, 1);
+      }
+      for (let i = slashVisuals.length - 1; i >= 0; i--) {
+        slashVisuals[i].duration--;
+        if (slashVisuals[i].duration <= 0) slashVisuals.splice(i, 1);
+      }
+    }
+
+    player.draw();
+    enemies.forEach(e => e.draw());
+    playerProjectiles.forEach(p => p.draw());
+    enemyProjectiles.forEach(p => p.draw());
+    damageNumbers.forEach(d => d.draw());
+
+    explosions.forEach(ex => {
+      ctx.beginPath();
+      ctx.arc(ex.x, ex.y, ex.maxRadius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(237, 137, 54, 0.35)';
+      ctx.fill();
+    });
+
+    slashVisuals.forEach(sv => {
+      ctx.save();
+      ctx.beginPath();
+      if (sv.isWhirlwind) {
+        ctx.arc(sv.x, sv.y, sv.radius, 0, Math.PI * 2);
+      } else {
+        ctx.arc(sv.x, sv.y, sv.radius, sv.angle - Math.PI / 3.5, sv.angle + Math.PI / 3.5);
+      }
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#ecc94b';
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+</script>
+</body>
+</html>
