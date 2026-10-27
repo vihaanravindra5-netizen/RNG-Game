@@ -1,2 +1,2 @@
-# RNG-Game
-a cool rng game
+# BRAWL ISLAND
+zalala
