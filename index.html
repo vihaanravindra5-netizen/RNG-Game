@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brawl Island - Sans & Gaster Blaster Edition</title>
+  <title>Brawl Island - Necromancer & Mage Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -150,16 +150,18 @@
 
     .starter-container {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .starter-card {
-      width: 200px;
+      width: 175px;
       background: #1a202c;
       border: 2px solid #4a5568;
       border-radius: 10px;
-      padding: 16px;
+      padding: 12px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -173,14 +175,14 @@
     }
 
     .starter-icon {
-      font-size: 40px;
-      margin-bottom: 8px;
+      font-size: 34px;
+      margin-bottom: 6px;
     }
 
     .mode-select-container {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .mode-btn {
@@ -206,9 +208,9 @@
       border: 1px solid #2d3748;
       border-radius: 8px;
       padding: 12px 18px;
-      width: 80%;
-      max-width: 650px;
-      margin-bottom: 20px;
+      width: 85%;
+      max-width: 720px;
+      margin-bottom: 16px;
     }
 
     .shop-title {
@@ -357,7 +359,7 @@
     <div class="hud-box">
       <div style="display: flex; justify-content: space-between;">
         <span>Hero Lvl <span id="lbl-level">1</span></span>
-        <span id="lbl-weapon-type" style="color:#ecc94b; text-transform: capitalize;">Melee</span>
+        <span id="lbl-weapon-type" style="color:#ecc94b; text-transform: capitalize;">Warrior</span>
       </div>
       <div class="bar-container">
         <div id="hp-bar" class="bar-fill-hp"></div>
@@ -378,7 +380,7 @@
 
   <div id="starter-modal" class="modal-overlay active">
     <h2 class="modal-title">Brawl Island</h2>
-    <div class="modal-subtitle">Choose difficulty, starting weapon, and persistent upgrades</div>
+    <div class="modal-subtitle">Choose difficulty, starting class, and persistent upgrades</div>
 
     <div class="mode-select-container">
       <button class="mode-btn" onclick="setDifficulty('easy')">Easy Mode</button>
@@ -396,6 +398,16 @@
         <div class="starter-icon">🏹</div>
         <div class="card-title">Ranger Bow</div>
         <div class="card-desc">Fires arrows from distance. Balanced projectile combat.</div>
+      </div>
+      <div id="card-mage" class="starter-card" onclick="selectWeapon('mage')">
+        <div class="starter-icon">🔮</div>
+        <div class="card-title">Elemental Mage</div>
+        <div class="card-desc">Fires burning Fireballs (AoE burn) and slowing Iceballs.</div>
+      </div>
+      <div id="card-necro" class="starter-card" onclick="selectWeapon('necro')">
+        <div class="starter-icon">💀</div>
+        <div class="card-title">Necromancer</div>
+        <div class="card-desc">Fires green essence that converts slained foes into Zombies & Ghosts.</div>
       </div>
     </div>
 
@@ -486,6 +498,16 @@
     proj_explosive: { id: 'proj_explosive', weapon: 'projectile', icon: '💥', title: 'Explosive Tip', desc: 'Explodes on impact dealing area damage' },
     proj_speed: { id: 'proj_speed', weapon: 'projectile', icon: '💨', title: 'Rapid Draw', desc: '+20% Attack Speed & Arrow Speed' },
 
+    mage_meteor: { id: 'mage_meteor', weapon: 'mage', icon: '☄️', title: 'Giant Meteor', desc: '+50% Fireball AoE radius and burn damage' },
+    mage_frostbite: { id: 'mage_frostbite', weapon: 'mage', icon: '❄️', title: 'Deep Freeze', desc: 'Iceballs freeze enemies in place for 1.5s' },
+    mage_dual: { id: 'mage_dual', weapon: 'mage', icon: '☯️', title: 'Elemental Convergence', desc: 'Fires both a Fireball and an Iceball simultaneously' },
+    mage_burn: { id: 'mage_burn', weapon: 'mage', icon: '🔥', title: 'Inferno Touch', desc: 'Burn ticks twice as fast and deals +50% total damage' },
+
+    necro_horde: { id: 'necro_horde', weapon: 'necro', icon: '🧟', title: 'Zombie Frenzy', desc: '+40% Zombie Movement Speed and Damage' },
+    necro_haunt: { id: 'necro_haunt', weapon: 'necro', icon: '👻', title: 'Ethereal Volley', desc: 'Ghosts throw 3 shards instead of 2 before vanishing' },
+    necro_plague: { id: 'necro_plague', weapon: 'necro', icon: '🧪', title: 'Corrupting Essence', desc: 'Green bolts pierce 1 additional target' },
+    necro_harvest: { id: 'necro_harvest', weapon: 'necro', icon: '💀', title: 'Soul Harvest', desc: 'Minion attacks heal player for 1 HP' },
+
     gen_hp: { id: 'gen_hp', weapon: 'any', icon: '❤️', title: 'Vitality Boost', desc: '+30 Max HP & Restores Full Health' },
     gen_regen: { id: 'gen_regen', weapon: 'any', icon: '💖', title: 'Regeneration', desc: 'Regenerates 2 HP per second' },
     gen_dmg: { id: 'gen_dmg', weapon: 'any', icon: '💪', title: 'Power Surge', desc: '+15% Global Damage' },
@@ -524,10 +546,26 @@
     hasRicochet: false,
     hasExplosive: false,
 
+    mageSpellToggle: 0,
+    hasMageMeteor: false,
+    hasMageFrostbite: false,
+    hasMageDual: false,
+    hasMageBurn: false,
+
+    hasNecroHorde: false,
+    hasNecroHaunt: false,
+    hasNecroPlague: false,
+    hasNecroHarvest: false,
+
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.weaponType === 'sword' ? '#3182ce' : '#38a169';
+
+      if (this.weaponType === 'sword') ctx.fillStyle = '#3182ce';
+      else if (this.weaponType === 'projectile') ctx.fillStyle = '#38a169';
+      else if (this.weaponType === 'mage') ctx.fillStyle = '#9f7aea';
+      else if (this.weaponType === 'necro') ctx.fillStyle = '#48bb78';
+
       ctx.fill();
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#ffffff';
@@ -582,6 +620,12 @@
         }
       } else if (this.weaponType === 'projectile') {
         this.executeProjectileAttack(angle);
+        this.attackCooldown = this.attackMaxCooldown;
+      } else if (this.weaponType === 'mage') {
+        this.executeMageAttack(angle);
+        this.attackCooldown = this.attackMaxCooldown;
+      } else if (this.weaponType === 'necro') {
+        this.executeNecroAttack(angle);
         this.attackCooldown = this.attackMaxCooldown;
       }
     },
@@ -657,6 +701,28 @@
           this.hasExplosive
         ));
       }
+    },
+
+    executeMageAttack(angle) {
+      const isCrit = Math.random() < this.critChance;
+      const finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+
+      if (this.hasMageDual) {
+        playerProjectiles.push(new MageOrb(this.x, this.y, angle - 0.1, finalDmg, isCrit, 'fire'));
+        playerProjectiles.push(new MageOrb(this.x, this.y, angle + 0.1, finalDmg, isCrit, 'ice'));
+      } else {
+        const spellType = (this.mageSpellToggle % 2 === 0) ? 'fire' : 'ice';
+        this.mageSpellToggle++;
+        playerProjectiles.push(new MageOrb(this.x, this.y, angle, finalDmg, isCrit, spellType));
+      }
+    },
+
+    executeNecroAttack(angle) {
+      const isCrit = Math.random() < this.critChance;
+      const finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+      const pierce = this.hasNecroPlague ? 2 : 1;
+
+      playerProjectiles.push(new NecroEssence(this.x, this.y, angle, finalDmg, isCrit, pierce));
     },
 
     takeDamage(amount) {
@@ -775,6 +841,249 @@
     }
   }
 
+  class MageOrb {
+    constructor(x, y, angle, damage, isCrit, spellType) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * 7.5;
+      this.vy = Math.sin(angle) * 7.5;
+      this.radius = 8;
+      this.damage = damage;
+      this.isCrit = isCrit;
+      this.spellType = spellType;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.spellType === 'fire' ? '#ed8936' : '#63b3ed';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      for (let e of enemies) {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= this.radius + e.radius) {
+          e.takeDamage(this.damage, this.isCrit);
+
+          if (this.spellType === 'fire') {
+            const aoe = player.hasMageMeteor ? 65 : 40;
+            explosions.push({ x: this.x, y: this.y, maxRadius: aoe, life: 12 });
+            enemies.forEach(ne => {
+              if (Math.hypot(ne.x - this.x, ne.y - this.y) <= aoe + ne.radius) {
+                ne.applyBurn(this.damage * (player.hasMageBurn ? 0.6 : 0.4));
+              }
+            });
+          } else if (this.spellType === 'ice') {
+            e.applyFreeze(player.hasMageFrostbite ? 90 : 60);
+          }
+
+          return false;
+        }
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
+  class NecroEssence {
+    constructor(x, y, angle, damage, isCrit, pierce) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * 8.0;
+      this.vy = Math.sin(angle) * 8.0;
+      this.radius = 7;
+      this.damage = damage;
+      this.isCrit = isCrit;
+      this.pierce = pierce;
+      this.hitEnemies = new Set();
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#48bb78';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#9ae6b4';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      for (let e of enemies) {
+        if (this.hitEnemies.has(e)) continue;
+
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= this.radius + e.radius) {
+          e.necroInfected = true;
+          e.takeDamage(this.damage, this.isCrit);
+          this.hitEnemies.add(e);
+
+          this.pierce--;
+          if (this.pierce <= 0) return false;
+        }
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
+  class AllyZombie {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.radius = 15;
+      this.hp = 120;
+      this.maxHp = 120;
+      this.speed = player.hasNecroHorde ? 2.5 : 1.8;
+      this.damage = 18 * (player.hasNecroHorde ? 1.4 : 1.0);
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#2f855a';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#9ae6b4';
+      ctx.stroke();
+
+      const barW = this.radius * 2;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 8, barW, 4);
+      ctx.fillStyle = '#48bb78';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 8, (this.hp / this.maxHp) * barW, 4);
+    }
+
+    update() {
+      if (enemies.length === 0) return true;
+
+      let closest = null;
+      let minDist = Infinity;
+      enemies.forEach(e => {
+        const d = Math.hypot(e.x - this.x, e.y - this.y);
+        if (d < minDist) {
+          minDist = d;
+          closest = e;
+        }
+      });
+
+      if (!closest) return true;
+
+      const angle = Math.atan2(closest.y - this.y, closest.x - this.x);
+      this.x += Math.cos(angle) * this.speed;
+      this.y += Math.sin(angle) * this.speed;
+
+      if (minDist <= this.radius + closest.radius) {
+        closest.takeDamage(this.damage * 0.05, false);
+        this.hp -= 0.5;
+
+        if (player.hasNecroHarvest && Math.random() < 0.1) {
+          player.hp = Math.min(player.maxHp, player.hp + 1);
+          updateHUD();
+        }
+      }
+
+      return this.hp > 0;
+    }
+  }
+
+  class AllyGhost {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.radius = 14;
+      this.maxShards = player.hasNecroHaunt ? 3 : 2;
+      this.shardsFired = 0;
+      this.shootTimer = 20;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(154, 230, 180, 0.65)';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      if (enemies.length === 0) return false;
+
+      this.shootTimer--;
+      if (this.shootTimer <= 0 && this.shardsFired < this.maxShards) {
+        let closest = null;
+        let minDist = Infinity;
+        enemies.forEach(e => {
+          const d = Math.hypot(e.x - this.x, e.y - this.y);
+          if (d < minDist) {
+            minDist = d;
+            closest = e;
+          }
+        });
+
+        if (closest) {
+          const angle = Math.atan2(closest.y - this.y, closest.x - this.x);
+          minionProjectiles.push(new GhoulShard(this.x, this.y, angle));
+          this.shardsFired++;
+          this.shootTimer = 25;
+        }
+      }
+
+      return this.shardsFired < this.maxShards;
+    }
+  }
+
+  class GhoulShard {
+    constructor(x, y, angle) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * 7.0;
+      this.vy = Math.sin(angle) * 7.0;
+      this.radius = 5;
+      this.damage = 25;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#68d391';
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      for (let e of enemies) {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= this.radius + e.radius) {
+          e.takeDamage(this.damage, false);
+          if (player.hasNecroHarvest) {
+            player.hp = Math.min(player.maxHp, player.hp + 1);
+            updateHUD();
+          }
+          return false;
+        }
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
   class Enemy {
     constructor(x, y, type, floor) {
       this.x = x;
@@ -787,6 +1096,11 @@
 
       const scale = (1 + (floor - 1) * 0.22) * diffMult;
 
+      this.burnTimer = 0;
+      this.burnDmg = 0;
+      this.freezeTimer = 0;
+      this.necroInfected = false;
+
       if (type === 'slime') {
         this.radius = 14;
         this.hp = 24 * scale;
@@ -797,7 +1111,6 @@
         this.goldReward = 8;
         this.xpReward = 12;
         this.leapTimer = 120;
-        this.isLeaping = false;
       } else if (type === 'ranger') {
         this.radius = 15;
         this.hp = 40 * scale;
@@ -841,13 +1154,22 @@
       }
     }
 
+    applyBurn(dmg) {
+      this.burnTimer = 90;
+      this.burnDmg = dmg;
+    }
+
+    applyFreeze(duration) {
+      this.freezeTimer = duration;
+    }
+
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
+      ctx.fillStyle = this.freezeTimer > 0 ? '#63b3ed' : (this.burnTimer > 0 ? '#ed8936' : this.color);
       ctx.fill();
       ctx.lineWidth = 2;
-      ctx.strokeStyle = '#000000';
+      ctx.strokeStyle = this.necroInfected ? '#48bb78' : '#000000';
       ctx.stroke();
 
       if (this.type === 'sans_boss') {
@@ -866,13 +1188,24 @@
     }
 
     update() {
+      if (this.burnTimer > 0) {
+        this.burnTimer--;
+        if (this.burnTimer % 15 === 0) {
+          this.takeDamage(this.burnDmg, false);
+        }
+      }
+
+      if (this.freezeTimer > 0) {
+        this.freezeTimer--;
+        return;
+      }
+
       const angle = Math.atan2(player.y - this.y, player.x - this.x);
       const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
 
       if (this.type === 'slime') {
         this.leapTimer--;
         if (this.leapTimer <= 0) {
-          this.isLeaping = true;
           this.x += Math.cos(angle) * 80;
           this.y += Math.sin(angle) * 80;
           this.leapTimer = 140;
@@ -957,6 +1290,14 @@
       }
       this.hp -= amount;
       damageNumbers.push(new DamageNumber(this.x, this.y - 10, Math.round(amount), isCrit ? '#f6e05e' : '#ffffff'));
+
+      if (this.hp <= 0 && this.necroInfected && this.type !== 'sans_boss') {
+        if (Math.random() < 0.5) {
+          allyMinions.push(new AllyZombie(this.x, this.y));
+        } else {
+          allyMinions.push(new AllyGhost(this.x, this.y));
+        }
+      }
     }
   }
 
@@ -1160,6 +1501,8 @@
   let enemies = [];
   let playerProjectiles = [];
   let enemyProjectiles = [];
+  let allyMinions = [];
+  let minionProjectiles = [];
   let damageNumbers = [];
   let slashVisuals = [];
   let explosions = [];
@@ -1178,6 +1521,8 @@
     selectedWeapon = type;
     document.getElementById('card-sword').classList.toggle('selected', type === 'sword');
     document.getElementById('card-projectile').classList.toggle('selected', type === 'projectile');
+    document.getElementById('card-mage').classList.toggle('selected', type === 'mage');
+    document.getElementById('card-necro').classList.toggle('selected', type === 'necro');
   }
 
   function buyPerk(perkKey) {
@@ -1213,6 +1558,8 @@
     enemies = [];
     playerProjectiles = [];
     enemyProjectiles = [];
+    allyMinions = [];
+    minionProjectiles = [];
     gasterBlasters = [];
     boneWalls = [];
     shockwaves = [];
@@ -1255,10 +1602,18 @@
       player.attackMaxCooldown = 28;
       player.baseDamage = 22;
       document.getElementById('lbl-weapon-type').innerText = 'Warrior Blade';
-    } else {
+    } else if (selectedWeapon === 'projectile') {
       player.attackMaxCooldown = 32;
       player.baseDamage = 13;
       document.getElementById('lbl-weapon-type').innerText = 'Ranger Bow';
+    } else if (selectedWeapon === 'mage') {
+      player.attackMaxCooldown = 30;
+      player.baseDamage = 16;
+      document.getElementById('lbl-weapon-type').innerText = 'Elemental Mage';
+    } else if (selectedWeapon === 'necro') {
+      player.attackMaxCooldown = 26;
+      player.baseDamage = 14;
+      document.getElementById('lbl-weapon-type').innerText = 'Necromancer';
     }
 
     document.getElementById('starter-modal').classList.remove('active');
@@ -1322,6 +1677,16 @@
       case 'proj_explosive': player.hasExplosive = true; break;
       case 'proj_speed': player.attackMaxCooldown = Math.max(12, Math.floor(player.attackMaxCooldown * 0.8)); break;
 
+      case 'mage_meteor': player.hasMageMeteor = true; break;
+      case 'mage_frostbite': player.hasMageFrostbite = true; break;
+      case 'mage_dual': player.hasMageDual = true; break;
+      case 'mage_burn': player.hasMageBurn = true; break;
+
+      case 'necro_horde': player.hasNecroHorde = true; break;
+      case 'necro_haunt': player.hasNecroHaunt = true; break;
+      case 'necro_plague': player.hasNecroPlague = true; break;
+      case 'necro_harvest': player.hasNecroHarvest = true; break;
+
       case 'gen_hp': player.maxHp += 30; player.hp = player.maxHp; break;
       case 'gen_regen': player.regenRate += 2.0; break;
       case 'gen_dmg': player.damageMult += 0.15; break;
@@ -1367,6 +1732,14 @@
     player.projPierce = 1;
     player.hasRicochet = false;
     player.hasExplosive = false;
+    player.hasMageMeteor = false;
+    player.hasMageFrostbite = false;
+    player.hasMageDual = false;
+    player.hasMageBurn = false;
+    player.hasNecroHorde = false;
+    player.hasNecroHaunt = false;
+    player.hasNecroPlague = false;
+    player.hasNecroHarvest = false;
 
     updateShopUI();
     document.getElementById('starter-modal').classList.add('active');
@@ -1406,6 +1779,8 @@
 
       playerProjectiles = playerProjectiles.filter(p => p.update());
       enemyProjectiles = enemyProjectiles.filter(p => p.update());
+      allyMinions = allyMinions.filter(m => m.update());
+      minionProjectiles = minionProjectiles.filter(mp => mp.update());
       gasterBlasters = gasterBlasters.filter(gb => gb.update());
       boneWalls = boneWalls.filter(bw => bw.update());
       shockwaves = shockwaves.filter(sw => sw.update());
@@ -1424,8 +1799,10 @@
 
     player.draw();
     enemies.forEach(e => e.draw());
+    allyMinions.forEach(m => m.draw());
     playerProjectiles.forEach(p => p.draw());
     enemyProjectiles.forEach(p => p.draw());
+    minionProjectiles.forEach(mp => mp.draw());
     boneWalls.forEach(bw => bw.draw());
     gasterBlasters.forEach(gb => gb.draw());
     shockwaves.forEach(sw => sw.draw());
@@ -1456,6 +1833,10 @@
   }
 
   loadSave();
+  gameLoop();
+</script>
+</body>
+</html>
   gameLoop();
 </script>
 </body>
