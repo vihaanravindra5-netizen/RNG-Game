@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brawl Island - Ultimate Class & Boss Assist Edition</title>
+  <title>Brawl Island - Admin Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -170,6 +170,54 @@
       transition: height 0.1s linear;
     }
 
+    #admin-panel {
+      position: absolute;
+      top: 60px;
+      right: 12px;
+      width: 250px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      z-index: 50;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      display: none;
+    }
+
+    .admin-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #38bdf8;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .admin-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 6px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .admin-btn:hover {
+      background: #38bdf8;
+      color: #0f172a;
+      border-color: #38bdf8;
+    }
+
     .modal-overlay {
       position: absolute;
       top: 0;
@@ -208,6 +256,35 @@
       margin-bottom: 20px;
       text-align: center;
       max-width: 600px;
+    }
+
+    .user-input-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: #1a202c;
+      border: 2px solid #4a5568;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .username-input {
+      padding: 10px 16px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 2px solid #4a5568;
+      background: #0f121a;
+      color: #ffffff;
+      outline: none;
+      text-align: center;
+      font-weight: bold;
+      width: 250px;
+    }
+
+    .username-input:focus {
+      border-color: #ecc94b;
     }
 
     .starter-container {
@@ -420,8 +497,8 @@
   <div id="ui-hud">
     <div class="hud-box">
       <div style="display: flex; justify-content: space-between;">
-        <span>Hero Lvl <span id="lbl-level">1</span></span>
-        <span id="lbl-weapon-type" style="color:#ecc94b; text-transform: capitalize;">Warrior</span>
+        <span><span id="lbl-username" style="color:#ecc94b;">Hero</span> (Lvl <span id="lbl-level">1</span>)</span>
+        <span id="lbl-weapon-type" style="color:#a0aec0; text-transform: capitalize;">Warrior</span>
       </div>
       <div class="bar-container">
         <div id="hp-bar" class="bar-fill-hp"></div>
@@ -437,6 +514,22 @@
       <div>Session Gold: <span id="lbl-gold" style="color:#f6e05e;">0</span></div>
       <div>Bank Gold: <span id="lbl-bank-gold" style="color:#ecc94b;">0</span></div>
       <div class="stat-badge">WASD / Arrows to Move</div>
+    </div>
+  </div>
+
+  <div id="admin-panel">
+    <div class="admin-title">⚡ Developer Admin Panel ⚡</div>
+    <div class="admin-grid">
+      <button class="admin-btn" onclick="adminCommand('godmode')">🛡️ Godmode</button>
+      <button class="admin-btn" onclick="adminCommand('killall')">☠️ Kill All</button>
+      <button class="admin-btn" onclick="adminCommand('gold')">💰 +100k Gold</button>
+      <button class="admin-btn" onclick="adminCommand('skip')">⏩ Skip Floor</button>
+      <button class="admin-btn" onclick="adminCommand('lvl')">⭐ +10 Levels</button>
+      <button class="admin-btn" onclick="adminCommand('speed')">⚡ Speed x3</button>
+      <button class="admin-btn" onclick="adminCommand('allassists')">🔮 Unlock Assists</button>
+      <button class="admin-btn" onclick="adminCommand('noddcd')">⏳ No Cooldowns</button>
+      <button class="admin-btn" onclick="adminCommand('nuke')">💥 Nuke Screen</button>
+      <button class="admin-btn" onclick="adminCommand('sans')">☠️ Spawn Sans</button>
     </div>
   </div>
 
@@ -467,7 +560,16 @@
     </button>
   </div>
 
-  <div id="starter-modal" class="modal-overlay active">
+  <div id="account-modal" class="modal-overlay active">
+    <h2 class="modal-title">Welcome to Brawl Island</h2>
+    <div class="modal-subtitle">Create your permanent warrior profile username to begin</div>
+    <div class="user-input-box">
+      <input type="text" id="txt-username" class="username-input" placeholder="Enter Username..." maxlength="15" />
+      <button class="btn-start" onclick="confirmAccountCreation()">Create Profile</button>
+    </div>
+  </div>
+
+  <div id="starter-modal" class="modal-overlay">
     <h2 class="modal-title">Brawl Island</h2>
     <div class="modal-subtitle">Choose difficulty, starting class, and persistent upgrades</div>
 
@@ -558,8 +660,12 @@
   let gameStarted = false;
   let selectedWeapon = 'sword';
   let difficulty = 'normal';
+  let isAdminUser = false;
+  let isGodmode = false;
+  let noCooldowns = false;
 
   let persistentData = {
+    username: '',
     bankGold: 0,
     perkHp: 0,
     perkDmg: 0,
@@ -590,12 +696,88 @@
         }
       } catch (e) {}
     }
+
+    if (persistentData.username) {
+      document.getElementById('account-modal').classList.remove('active');
+      document.getElementById('starter-modal').classList.add('active');
+      checkAdminStatus();
+    } else {
+      document.getElementById('account-modal').classList.add('active');
+    }
+
     updateShopUI();
     updateAssistHUD();
   }
 
   function saveGameData() {
     localStorage.setItem('brawl_island_save', JSON.stringify(persistentData));
+  }
+
+  function confirmAccountCreation() {
+    const input = document.getElementById('txt-username').value.trim();
+    if (!input) return alert('Please enter a valid username!');
+
+    persistentData.username = input;
+    saveGameData();
+
+    document.getElementById('account-modal').classList.remove('active');
+    document.getElementById('starter-modal').classList.add('active');
+
+    checkAdminStatus();
+    updateShopUI();
+  }
+
+  function checkAdminStatus() {
+    if (persistentData.username === 'admin123') {
+      isAdminUser = true;
+      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('lbl-username').style.color = '#38bdf8';
+      document.getElementById('lbl-username').innerText = '[ADMIN] admin123';
+    } else {
+      document.getElementById('lbl-username').innerText = persistentData.username;
+    }
+  }
+
+  function adminCommand(cmd) {
+    if (!isAdminUser) return;
+
+    if (cmd === 'godmode') {
+      isGodmode = !isGodmode;
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, isGodmode ? 'GODMODE ON' : 'GODMODE OFF', '#38bdf8'));
+    } else if (cmd === 'killall') {
+      enemies.forEach(e => e.takeDamage(999999, true));
+    } else if (cmd === 'gold') {
+      player.gold += 100000;
+      persistentData.bankGold += 100000;
+      saveGameData();
+      updateHUD();
+      updateShopUI();
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, '+100K GOLD!', '#f6e05e'));
+    } else if (cmd === 'skip') {
+      enemies = [];
+      presentUpgradeChoices();
+    } else if (cmd === 'lvl') {
+      for (let i = 0; i < 10; i++) player.gainRewards(player.xpNeeded, 0);
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, '+10 LEVELS!', '#38bdf8'));
+    } else if (cmd === 'speed') {
+      player.speed = 12.0;
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, 'HYPERSPEED!', '#38bdf8'));
+    } else if (cmd === 'allassists') {
+      persistentData.unlockedAssists = { golem: true, inferno: true, kraken: true, sans: true };
+      saveGameData();
+      updateAssistHUD();
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, 'ALL ASSISTS UNLOCKED!', '#ecc94b'));
+    } else if (cmd === 'noddcd') {
+      noCooldowns = !noCooldowns;
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, noCooldowns ? 'NO CD ON' : 'NO CD OFF', '#38bdf8'));
+    } else if (cmd === 'nuke') {
+      for (let i = 0; i < 36; i++) {
+        const a = (Math.PI * 2 / 36) * i;
+        playerProjectiles.push(new MageOrb(player.x, player.y, a, 500, true, 'fire'));
+      }
+    } else if (cmd === 'sans') {
+      enemies.push(new Enemy(700, 325, 'sans_boss', player.floor));
+    }
   }
 
   const UPGRADE_POOL = {
@@ -697,7 +879,7 @@
 
       ctx.fill();
       ctx.lineWidth = 3;
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = isAdminUser ? '#38bdf8' : '#ffffff';
       ctx.stroke();
 
       ctx.beginPath();
@@ -716,6 +898,8 @@
         this.hp = Math.min(this.maxHp, this.hp + (this.regenRate / 60));
         updateHUD();
       }
+
+      if (noCooldowns) this.attackCooldown = 0;
 
       if (this.attackCooldown > 0) {
         this.attackCooldown--;
@@ -872,6 +1056,8 @@
     },
 
     takeDamage(amount) {
+      if (isGodmode) return;
+
       if (this.hasSwordParry && Math.random() < 0.15) {
         damageNumbers.push(new DamageNumber(this.x, this.y - 15, 'PARRY!', '#3182ce'));
         return;
@@ -1533,7 +1719,7 @@
   }
 
   function useAssist(type) {
-    if (!persistentData.unlockedAssists[type] || assistCooldowns[type].current > 0 || isGamePaused) return;
+    if (!persistentData.unlockedAssists[type] || (assistCooldowns[type].current > 0 && !noCooldowns) || isGamePaused) return;
 
     assistCooldowns[type].current = assistCooldowns[type].max;
 
@@ -1566,7 +1752,7 @@
       const btn = document.getElementById(`btn-assist-${type}`);
       if (persistentData.unlockedAssists[type]) {
         btn.style.display = 'flex';
-        btn.disabled = assistCooldowns[type].current > 0;
+        btn.disabled = assistCooldowns[type].current > 0 && !noCooldowns;
       } else {
         btn.style.display = 'none';
       }
@@ -2065,7 +2251,7 @@
       player.update();
 
       ['golem', 'inferno', 'kraken', 'sans'].forEach(type => {
-        if (assistCooldowns[type].current > 0) {
+        if (assistCooldowns[type].current > 0 && !noCooldowns) {
           assistCooldowns[type].current--;
           const pct = (assistCooldowns[type].current / assistCooldowns[type].max) * 100;
           document.getElementById(`cd-${type}`).style.height = `${pct}%`;
@@ -2142,20 +2328,6 @@
 
     requestAnimationFrame(gameLoop);
   }
-
-  loadSave();
-  gameLoop();
-</script>
-</body>
-</html>
-  gameLoop();
-</script>
-</body>
-</html>
-  gameLoop();
-</script>
-</body>
-</html>
 
   loadSave();
   gameLoop();
