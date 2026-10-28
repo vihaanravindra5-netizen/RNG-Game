@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brawl Island - Ultimate Edition</title>
+  <title>Brawl Island - Admin Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -176,16 +176,16 @@
       right: 12px;
       width: 250px;
       background: rgba(15, 23, 42, 0.95);
-      border: 2px solid #38bdf8;
+      border: 2px solid #e2e8f0;
       border-radius: 10px;
       padding: 12px;
       z-index: 50;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
       display: none;
     }
 
     .admin-title {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: bold;
       color: #38bdf8;
       text-transform: uppercase;
@@ -537,6 +537,1800 @@
     <button id="btn-assist-golem" class="assist-btn" onclick="useAssist('golem')" disabled style="display:none;">
       <span class="assist-key">[1]</span>
       <span class="assist-icon">🪨</span>
-      <span style="font-size:9px; font-weight:bold; color:#a0aec0;">
+      <span style="font-size:9px; font-weight:bold; color:#a0aec0;">Golem</span>
+      <div id="cd-golem" class="assist-cooldown-overlay"></div>
+    </button>
+    <button id="btn-assist-inferno" class="assist-btn" onclick="useAssist('inferno')" disabled style="display:none;">
+      <span class="assist-key">[2]</span>
+      <span class="assist-icon">🔥</span>
+      <span style="font-size:9px; font-weight:bold; color:#a0aec0;">Inferno</span>
+      <div id="cd-inferno" class="assist-cooldown-overlay"></div>
+    </button>
+    <button id="btn-assist-kraken" class="assist-btn" onclick="useAssist('kraken')" disabled style="display:none;">
+      <span class="assist-key">[3]</span>
+      <span class="assist-icon">🐙</span>
+      <span style="font-size:9px; font-weight:bold; color:#a0aec0;">Kraken</span>
+      <div id="cd-kraken" class="assist-cooldown-overlay"></div>
+    </button>
+    <button id="btn-assist-sans" class="assist-btn" onclick="useAssist('sans')" disabled style="display:none;">
+      <span class="assist-key">[4]</span>
+      <span class="assist-icon">☠️</span>
+      <span style="font-size:9px; font-weight:bold; color:#ecc94b;">Boney</span>
+      <div id="cd-sans" class="assist-cooldown-overlay"></div>
+    </button>
+  </div>
+
+  <div id="account-modal" class="modal-overlay active">
+    <h2 class="modal-title">Welcome to Brawl Island</h2>
+    <div class="modal-subtitle">Create your permanent warrior profile username to begin</div>
+    <div class="user-input-box">
+      <input type="text" id="txt-username" class="username-input" placeholder="Enter Username..." maxlength="15" />
+      <button class="btn-start" onclick="confirmAccountCreation()">Create Profile</button>
+    </div>
+  </div>
+
+  <div id="starter-modal" class="modal-overlay">
+    <h2 class="modal-title">Brawl Island</h2>
+    <div class="modal-subtitle">Choose difficulty, starting class, and persistent upgrades</div>
+
+    <div class="mode-select-container">
+      <button class="mode-btn" onclick="setDifficulty('easy')">Easy Mode</button>
+      <button class="mode-btn active" onclick="setDifficulty('normal')">Normal Mode</button>
+      <button class="mode-btn" onclick="setDifficulty('hard')">Hard Mode</button>
+    </div>
+
+    <div class="starter-container">
+      <div id="card-sword" class="starter-card selected" onclick="selectWeapon('sword')">
+        <div class="starter-icon">⚔️</div>
+        <div class="card-title">Warrior Blade</div>
+        <div class="card-desc">Melee arcs hitting all nearby foes. High damage and steady cooldown.</div>
+      </div>
+      <div id="card-projectile" class="starter-card" onclick="selectWeapon('projectile')">
+        <div class="starter-icon">🏹</div>
+        <div class="card-title">Ranger Bow</div>
+        <div class="card-desc">Fires arrows from distance. Balanced projectile combat.</div>
+      </div>
+      <div id="card-mage" class="starter-card" onclick="selectWeapon('mage')">
+        <div class="starter-icon">🔮</div>
+        <div class="card-title">Elemental Mage</div>
+        <div class="card-desc">Fires burning Fireballs (AoE burn) and slowing Iceballs.</div>
+      </div>
+      <div id="card-necro" class="starter-card" onclick="selectWeapon('necro')">
+        <div class="starter-icon">💀</div>
+        <div class="card-title">Necromancer</div>
+        <div class="card-desc">Fires green essence that converts slained foes into Zombies & Ghosts.</div>
+      </div>
+    </div>
+
+    <div class="shop-section">
+      <div class="shop-title">
+        <span>Persistent Upgrades Shop</span>
+        <span>Saved Bank: <span id="shop-bank-gold">0</span> Gold</span>
+      </div>
+      <div class="shop-grid">
+        <div class="perk-item">
+          <div><strong>+20 Max HP</strong></div>
+          <div id="perk-hp-level">Lvl: 0 / 5</div>
+          <button id="btn-buy-hp" class="perk-btn" onclick="buyPerk('hp')">Buy (50 Gold)</button>
+        </div>
+        <div class="perk-item">
+          <div><strong>+10% Damage</strong></div>
+          <div id="perk-dmg-level">Lvl: 0 / 5</div>
+          <button id="btn-buy-dmg" class="perk-btn" onclick="buyPerk('dmg')">Buy (75 Gold)</button>
+        </div>
+        <div class="perk-item">
+          <div><strong>+5% Move Speed</strong></div>
+          <div id="perk-spd-level">Lvl: 0 / 5</div>
+          <button id="btn-buy-spd" class="perk-btn" onclick="buyPerk('spd')">Buy (60 Gold)</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-start" onclick="startGame()">Enter Dungeon</button>
+  </div>
+
+  <div id="upgrade-modal" class="modal-overlay">
+    <h2 class="modal-title" id="upgrade-title">Floor Cleared!</h2>
+    <div class="modal-subtitle" id="upgrade-subtitle">Choose 1 perk or weapon upgrade to advance to the next floor</div>
+    <div id="card-container" class="card-container"></div>
+  </div>
+
+  <div id="gameover-modal" class="modal-overlay">
+    <h2 class="modal-title" style="color: #e53e3e;">Defeated in Dungeon!</h2>
+    <div class="modal-subtitle" id="gameover-stats">You reached Floor 1</div>
+    <button class="btn-restart" onclick="restartGame()">Return to Lobby</button>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const keys = {};
+  window.addEventListener('keydown', e => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === '1') useAssist('golem');
+    if (e.key === '2') useAssist('inferno');
+    if (e.key === '3') useAssist('kraken');
+    if (e.key === '4') useAssist('sans');
+  });
+  window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+  let isGamePaused = true;
+  let gameStarted = false;
+  let selectedWeapon = 'sword';
+  let difficulty = 'normal';
+  let isAdminUser = false;
+  let isGodmode = false;
+  let noCooldowns = false;
+
+  let persistentData = {
+    username: '',
+    bankGold: 0,
+    perkHp: 0,
+    perkDmg: 0,
+    perkSpd: 0,
+    unlockedAssists: {
+      golem: false,
+      inferno: false,
+      kraken: false,
+      sans: false
+    }
+  };
+
+  const assistCooldowns = {
+    golem: { max: 1200, current: 0 },
+    inferno: { max: 1500, current: 0 },
+    kraken: { max: 1800, current: 0 },
+    sans: { max: 2400, current: 0 }
+  };
+
+  function loadSave() {
+    const data = localStorage.getItem('brawl_island_save');
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        persistentData = Object.assign(persistentData, parsed);
+        if (parsed.unlockedAssists) {
+          persistentData.unlockedAssists = Object.assign(persistentData.unlockedAssists, parsed.unlockedAssists);
+        }
+      } catch (e) {}
+    }
+
+    if (persistentData.username) {
+      document.getElementById('account-modal').classList.remove('active');
+      document.getElementById('starter-modal').classList.add('active');
+      checkAdminStatus();
+    } else {
+      document.getElementById('account-modal').classList.add('active');
+    }
+
+    updateShopUI();
+    updateAssistHUD();
+  }
+
+  function saveGameData() {
+    localStorage.setItem('brawl_island_save', JSON.stringify(persistentData));
+  }
+
+  function confirmAccountCreation() {
+    const input = document.getElementById('txt-username').value.trim();
+    if (!input) return alert('Please enter a valid username!');
+
+    persistentData.username = input;
+    saveGameData();
+
+    document.getElementById('account-modal').classList.remove('active');
+    document.getElementById('starter-modal').classList.add('active');
+
+    checkAdminStatus();
+    updateShopUI();
+  }
+
+  function checkAdminStatus() {
+    if (persistentData.username === 'admin123') {
+      isAdminUser = true;
+      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('lbl-username').style.color = '#38bdf8';
+      document.getElementById('lbl-username').innerText = '[ADMIN] admin123';
+    } else {
+      document.getElementById('lbl-username').innerText = persistentData.username;
+    }
+  }
+
+  function adminCommand(cmd) {
+    if (!isAdminUser) return;
+
+    if (cmd === 'godmode') {
+      isGodmode = !isGodmode;
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, isGodmode ? 'GODMODE ON' : 'GODMODE OFF', '#38bdf8'));
+    } else if (cmd === 'killall') {
+      enemies.forEach(e => e.takeDamage(999999, true));
+    } else if (cmd === 'gold') {
+      player.gold += 100000;
+      persistentData.bankGold += 100000;
+      saveGameData();
+      updateHUD();
+      updateShopUI();
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, '+100K GOLD!', '#f6e05e'));
+    } else if (cmd === 'skip') {
+      enemies = [];
+      presentUpgradeChoices();
+    } else if (cmd === 'lvl') {
+      for (let i = 0; i < 10; i++) player.gainRewards(player.xpNeeded, 0);
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, '+10 LEVELS!', '#38bdf8'));
+    } else if (cmd === 'speed') {
+      player.speed = 12.0;
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, 'HYPERSPEED!', '#38bdf8'));
+    } else if (cmd === 'allassists') {
+      persistentData.unlockedAssists = { golem: true, inferno: true, kraken: true, sans: true };
+      saveGameData();
+      updateAssistHUD();
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, 'ALL ASSISTS UNLOCKED!', '#ecc94b'));
+    } else if (cmd === 'noddcd') {
+      noCooldowns = !noCooldowns;
+      damageNumbers.push(new DamageNumber(player.x, player.y - 30, noCooldowns ? 'NO CD ON' : 'NO CD OFF', '#38bdf8'));
+    } else if (cmd === 'nuke') {
+      for (let i = 0; i < 36; i++) {
+        const a = (Math.PI * 2 / 36) * i;
+        playerProjectiles.push(new MageOrb(player.x, player.y, a, 500, true, 'fire'));
+      }
+    } else if (cmd === 'sans') {
+      enemies.push(new Enemy(700, 325, 'sans_boss', player.floor));
+    }
+  }
+
+  const UPGRADE_POOL = {
+    sword_range: { id: 'sword_range', weapon: 'sword', icon: '🗡️', title: 'Blade Reach', desc: '+25% Swing Arc Radius' },
+    sword_double: { id: 'sword_double', weapon: 'sword', icon: '⚔️', title: 'Double Slash', desc: 'Adds a secondary trailing slash' },
+    sword_whirlwind: { id: 'sword_whirlwind', weapon: 'sword', icon: '🌀', title: 'Whirlwind Slash', desc: '360 degree full circle slashes' },
+    sword_lifesteal: { id: 'sword_lifesteal', weapon: 'sword', icon: '🩸', title: 'Vampiric Edge', desc: 'Slashes heal 2.5% max HP on hit' },
+    sword_speed: { id: 'sword_speed', weapon: 'sword', icon: '⚡', title: 'Furious Swing', desc: '+25% Attack Speed for Sword' },
+    sword_heavy: { id: 'sword_heavy', weapon: 'sword', icon: '🔨', title: 'Heavy Impact', desc: 'Slashes knock enemies back and deal +30% damage' },
+    sword_parry: { id: 'sword_parry', weapon: 'sword', icon: '🛡️', title: 'Blade Shield', desc: 'Grants 15% chance to completely block incoming attacks' },
+
+    proj_multishot: { id: 'proj_multishot', weapon: 'projectile', icon: '🏹', title: 'Multishot', desc: '+1 Extra projectile fired per volley' },
+    proj_pierce: { id: 'proj_pierce', weapon: 'projectile', icon: '🎯', title: 'Piercing Arrows', desc: 'Passes through 1 additional enemy' },
+    proj_ricochet: { id: 'proj_ricochet', weapon: 'projectile', icon: '🛡️', title: 'Ricochet', desc: 'Bounces off screen walls once' },
+    proj_explosive: { id: 'proj_explosive', weapon: 'projectile', icon: '💥', title: 'Explosive Tip', desc: 'Explodes on impact dealing area damage' },
+    proj_speed: { id: 'proj_speed', weapon: 'projectile', icon: '💨', title: 'Rapid Draw', desc: '+20% Attack Speed & Arrow Speed' },
+    proj_homing: { id: 'proj_homing', weapon: 'projectile', icon: '🦅', title: 'Seeking Bolts', desc: 'Arrows curve towards nearby targets' },
+    proj_sniper: { id: 'proj_sniper', weapon: 'projectile', icon: '👁️', title: 'Eagle Eye', desc: '+35% Critical Chance on ranged hits' },
+
+    mage_meteor: { id: 'mage_meteor', weapon: 'mage', icon: '☄️', title: 'Giant Meteor', desc: '+50% Fireball AoE radius and burn damage' },
+    mage_frostbite: { id: 'mage_frostbite', weapon: 'mage', icon: '❄️', title: 'Deep Freeze', desc: 'Iceballs freeze enemies in place for 1.5s' },
+    mage_dual: { id: 'mage_dual', weapon: 'mage', icon: '☯️', title: 'Elemental Convergence', desc: 'Fires both a Fireball and an Iceball simultaneously' },
+    mage_burn: { id: 'mage_burn', weapon: 'mage', icon: '🔥', title: 'Inferno Touch', desc: 'Burn ticks twice as fast and deals +50% total damage' },
+    mage_lightning: { id: 'mage_lightning', weapon: 'mage', icon: '⚡', title: 'Chain Lightning', desc: 'Spells release bolts targeting up to 2 adjacent foes' },
+    mage_shield: { id: 'mage_shield', weapon: 'mage', icon: '🔮', title: 'Mana Barrier', desc: 'Converts 20% of magic damage dealt directly into HP' },
+
+    necro_horde: { id: 'necro_horde', weapon: 'necro', icon: '🧟', title: 'Zombie Frenzy', desc: '+40% Zombie Movement Speed and Damage' },
+    necro_haunt: { id: 'necro_haunt', weapon: 'necro', icon: '👻', title: 'Ethereal Volley', desc: 'Ghosts throw 3 shards instead of 2 before vanishing' },
+    necro_plague: { id: 'necro_plague', weapon: 'necro', icon: '🧪', title: 'Corrupting Essence', desc: 'Green bolts pierce 1 additional target' },
+    necro_harvest: { id: 'necro_harvest', weapon: 'necro', icon: '💀', title: 'Soul Harvest', desc: 'Minion attacks heal player for 1 HP' },
+    necro_golem: { id: 'necro_golem', weapon: 'necro', icon: '🦴', title: 'Bone Minion', desc: 'Infected foes spawn giant Skeleton Guards with high HP' },
+    necro_curse: { id: 'necro_curse', weapon: 'necro', icon: '☣️', title: 'Dark Aura', desc: 'Enemies near your minions suffer -30% speed & continuous damage' },
+
+    gen_hp: { id: 'gen_hp', weapon: 'any', icon: '❤️', title: 'Vitality Boost', desc: '+30 Max HP & Restores Full Health' },
+    gen_regen: { id: 'gen_regen', weapon: 'any', icon: '💖', title: 'Regeneration', desc: 'Regenerates 2 HP per second' },
+    gen_dmg: { id: 'gen_dmg', weapon: 'any', icon: '💪', title: 'Power Surge', desc: '+15% Global Damage' },
+    gen_crit: { id: 'gen_crit', weapon: 'any', icon: '🎯', title: 'Critical Eye', desc: '+12% Critical Chance (2x Damage)' },
+    gen_speed: { id: 'gen_speed', weapon: 'any', icon: '👟', title: 'Swift Step', desc: '+10% Movement Speed' }
+  };
+
+  const player = {
+    x: 450,
+    y: 325,
+    radius: 16,
+    speed: 3.8,
+    hp: 100,
+    maxHp: 100,
+    regenRate: 0,
+    level: 1,
+    xp: 0,
+    xpNeeded: 50,
+    gold: 0,
+    floor: 1,
+
+    weaponType: 'sword',
+    baseDamage: 20,
+    damageMult: 1.0,
+    critChance: 0.05,
+    attackCooldown: 0,
+    attackMaxCooldown: 30,
+
+    swordRangeMult: 1.0,
+    hasDoubleSlash: false,
+    hasWhirlwind: false,
+    hasLifesteal: false,
+    hasSwordHeavy: false,
+    hasSwordParry: false,
+
+    extraProjectiles: 1,
+    projPierce: 1,
+    hasRicochet: false,
+    hasExplosive: false,
+    hasProjHoming: false,
+    hasProjSniper: false,
+
+    mageSpellToggle: 0,
+    hasMageMeteor: false,
+    hasMageFrostbite: false,
+    hasMageDual: false,
+    hasMageBurn: false,
+    hasMageLightning: false,
+    hasMageShield: false,
+
+    hasNecroHorde: false,
+    hasNecroHaunt: false,
+    hasNecroPlague: false,
+    hasNecroHarvest: false,
+    hasNecroGolem: false,
+    hasNecroCurse: false,
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+
+      if (this.weaponType === 'sword') ctx.fillStyle = '#3182ce';
+      else if (this.weaponType === 'projectile') ctx.fillStyle = '#38a169';
+      else if (this.weaponType === 'mage') ctx.fillStyle = '#9f7aea';
+      else if (this.weaponType === 'necro') ctx.fillStyle = '#48bb78';
+
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = isAdminUser ? '#38bdf8' : '#ffffff';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius - 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.fill();
+    },
+
+    update() {
+      if (keys['w'] || keys['arrowup']) if (this.y - this.radius > 10) this.y -= this.speed;
+      if (keys['s'] || keys['arrowdown']) if (this.y + this.radius < canvas.height - 10) this.y += this.speed;
+      if (keys['a'] || keys['arrowleft']) if (this.x - this.radius > 10) this.x -= this.speed;
+      if (keys['d'] || keys['arrowright']) if (this.x + this.radius < canvas.width - 10) this.x += this.speed;
+
+      if (this.regenRate > 0 && this.hp < this.maxHp) {
+        this.hp = Math.min(this.maxHp, this.hp + (this.regenRate / 60));
+        updateHUD();
+      }
+
+      if (noCooldowns) this.attackCooldown = 0;
+
+      if (this.attackCooldown > 0) {
+        this.attackCooldown--;
+      } else {
+        this.autoAttack();
+      }
+    },
+
+    autoAttack() {
+      if (enemies.length === 0) return;
+
+      let closestEnemy = null;
+      let minDist = Infinity;
+      enemies.forEach(e => {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist < minDist) {
+          minDist = dist;
+          closestEnemy = e;
+        }
+      });
+
+      if (!closestEnemy) return;
+
+      const angle = Math.atan2(closestEnemy.y - this.y, closestEnemy.x - this.x);
+
+      if (this.weaponType === 'sword') {
+        const range = 65 * this.swordRangeMult;
+        if (minDist <= range + closestEnemy.radius + 15) {
+          this.executeSwordAttack(angle, range);
+          this.attackCooldown = this.attackMaxCooldown;
+        }
+      } else if (this.weaponType === 'projectile') {
+        this.executeProjectileAttack(angle);
+        this.attackCooldown = this.attackMaxCooldown;
+      } else if (this.weaponType === 'mage') {
+        this.executeMageAttack(angle);
+        this.attackCooldown = this.attackMaxCooldown;
+      } else if (this.weaponType === 'necro') {
+        this.executeNecroAttack(angle);
+        this.attackCooldown = this.attackMaxCooldown;
+      }
+    },
+
+    executeSwordAttack(angle, range) {
+      const isCrit = Math.random() < this.critChance;
+      let finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+      if (this.hasSwordHeavy) finalDmg *= 1.3;
+
+      slashVisuals.push({
+        x: this.x,
+        y: this.y,
+        angle: angle,
+        radius: range,
+        isWhirlwind: this.hasWhirlwind,
+        duration: 12
+      });
+
+      if (this.hasDoubleSlash) {
+        setTimeout(() => {
+          slashVisuals.push({
+            x: this.x,
+            y: this.y,
+            angle: angle,
+            radius: range,
+            isWhirlwind: this.hasWhirlwind,
+            duration: 10
+          });
+          this.damageEnemiesInArc(angle, range, finalDmg * 0.65, isCrit);
+        }, 110);
+      }
+
+      this.damageEnemiesInArc(angle, range, finalDmg, isCrit);
+    },
+
+    damageEnemiesInArc(angle, range, damage, isCrit) {
+      const arcWidth = this.hasWhirlwind ? Math.PI * 2 : (Math.PI / 1.8) * this.swordRangeMult;
+
+      enemies.forEach(e => {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= range + e.radius) {
+          const enemyAngle = Math.atan2(e.y - this.y, e.x - this.x);
+          let diff = Math.abs(angle - enemyAngle);
+          while (diff > Math.PI) diff = Math.PI * 2 - diff;
+
+          if (this.hasWhirlwind || diff <= arcWidth / 2) {
+            e.takeDamage(damage, isCrit);
+
+            if (this.hasSwordHeavy) {
+              e.x += Math.cos(enemyAngle) * 35;
+              e.y += Math.sin(enemyAngle) * 35;
+            }
+
+            if (this.hasLifesteal) {
+              this.hp = Math.min(this.maxHp, this.hp + (this.maxHp * 0.025));
+              updateHUD();
+            }
+          }
+        }
+      });
+    },
+
+    executeProjectileAttack(angle) {
+      const count = this.extraProjectiles;
+      const spread = 0.16;
+      let critChance = this.critChance;
+      if (this.hasProjSniper) critChance += 0.35;
+
+      for (let i = 0; i < count; i++) {
+        const offsetAngle = angle + (i - (count - 1) / 2) * spread;
+        const isCrit = Math.random() < critChance;
+        const finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+
+        playerProjectiles.push(new ArrowProjectile(
+          this.x,
+          this.y,
+          offsetAngle,
+          finalDmg,
+          isCrit,
+          this.projPierce,
+          this.hasRicochet,
+          this.hasExplosive,
+          this.hasProjHoming
+        ));
+      }
+    },
+
+    executeMageAttack(angle) {
+      const isCrit = Math.random() < this.critChance;
+      const finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+
+      if (this.hasMageLightning) {
+        enemies.slice(0, 2).forEach(e => {
+          e.takeDamage(finalDmg * 0.5, false);
+          damageNumbers.push(new DamageNumber(e.x, e.y - 15, '⚡', '#ecc94b'));
+        });
+      }
+
+      if (this.hasMageDual) {
+        playerProjectiles.push(new MageOrb(this.x, this.y, angle - 0.1, finalDmg, isCrit, 'fire'));
+        playerProjectiles.push(new MageOrb(this.x, this.y, angle + 0.1, finalDmg, isCrit, 'ice'));
+      } else {
+        const spellType = (this.mageSpellToggle % 2 === 0) ? 'fire' : 'ice';
+        this.mageSpellToggle++;
+        playerProjectiles.push(new MageOrb(this.x, this.y, angle, finalDmg, isCrit, spellType));
+      }
+    },
+
+    executeNecroAttack(angle) {
+      const isCrit = Math.random() < this.critChance;
+      const finalDmg = this.baseDamage * this.damageMult * (isCrit ? 2 : 1);
+      const pierce = this.hasNecroPlague ? 2 : 1;
+
+      playerProjectiles.push(new NecroEssence(this.x, this.y, angle, finalDmg, isCrit, pierce));
+    },
+
+    takeDamage(amount) {
+      if (isGodmode) return;
+
+      if (this.hasSwordParry && Math.random() < 0.15) {
+        damageNumbers.push(new DamageNumber(this.x, this.y - 15, 'PARRY!', '#3182ce'));
+        return;
+      }
+
+      this.hp -= amount;
+      damageNumbers.push(new DamageNumber(this.x, this.y - 15, Math.round(amount), '#f56565'));
+      if (this.hp <= 0) {
+        this.hp = 0;
+        triggerGameOver();
+      }
+      updateHUD();
+    },
+
+    gainRewards(xpAmount, goldAmount) {
+      this.gold += goldAmount;
+      persistentData.bankGold += goldAmount;
+      this.xp += xpAmount;
+
+      if (this.xp >= this.xpNeeded) {
+        this.level++;
+        this.xp -= this.xpNeeded;
+        this.xpNeeded = Math.floor(this.xpNeeded * 1.5);
+        this.maxHp += 12;
+        this.hp = this.maxHp;
+        this.baseDamage += 2;
+      }
+      saveGameData();
+      updateHUD();
+    }
+  };
+
+  class ArrowProjectile {
+    constructor(x, y, angle, damage, isCrit, pierce, ricochet, explosive, homing) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.speed = 9.0;
+      this.vx = Math.cos(angle) * this.speed;
+      this.vy = Math.sin(angle) * this.speed;
+      this.length = 16;
+      this.damage = damage;
+      this.isCrit = isCrit;
+      this.pierce = pierce;
+      this.ricochet = ricochet;
+      this.explosive = explosive;
+      this.homing = homing;
+      this.hitEnemies = new Set();
+      this.bounced = false;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+
+      ctx.beginPath();
+      ctx.moveTo(-this.length / 2, 0);
+      ctx.lineTo(this.length / 2, 0);
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = this.isCrit ? '#f6e05e' : '#63b3ed';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(this.length / 2, 0);
+      ctx.lineTo(this.length / 2 - 5, -4);
+      ctx.lineTo(this.length / 2 - 5, 4);
+      ctx.fillStyle = this.isCrit ? '#f6e05e' : '#63b3ed';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    update() {
+      if (this.homing && enemies.length > 0) {
+        let closest = enemies[0];
+        let minDist = Math.hypot(closest.x - this.x, closest.y - this.y);
+        enemies.forEach(e => {
+          const d = Math.hypot(e.x - this.x, e.y - this.y);
+          if (d < minDist) { minDist = d; closest = e; }
+        });
+        const targetAngle = Math.atan2(closest.y - this.y, closest.x - this.x);
+        this.angle += (targetAngle - this.angle) * 0.08;
+        this.vx = Math.cos(this.angle) * this.speed;
+        this.vy = Math.sin(this.angle) * this.speed;
+      }
+
+      this.x += this.vx;
+      this.y += this.vy;
+
+      if (this.ricochet && !this.bounced) {
+        if (this.x <= 5 || this.x >= canvas.width - 5) {
+          this.vx *= -1;
+          this.angle = Math.atan2(this.vy, this.vx);
+          this.bounced = true;
+        }
+        if (this.y <= 5 || this.y >= canvas.height - 5) {
+          this.vy *= -1;
+          this.angle = Math.atan2(this.vy, this.vx);
+          this.bounced = true;
+        }
+      }
+
+      for (let e of enemies) {
+        if (this.hitEnemies.has(e)) continue;
+
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= 8 + e.radius) {
+          e.takeDamage(this.damage, this.isCrit);
+          this.hitEnemies.add(e);
+
+          if (this.explosive) {
+            this.triggerExplosion();
+          }
+
+          this.pierce--;
+          if (this.pierce <= 0) return false;
+        }
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+
+    triggerExplosion() {
+      explosions.push({ x: this.x, y: this.y, maxRadius: 40, life: 10 });
+      enemies.forEach(e => {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= 40 + e.radius) {
+          e.takeDamage(this.damage * 0.5, false);
+        }
+      });
+    }
+  }
+
+  class MageOrb {
+    constructor(x, y, angle, damage, isCrit, spellType) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * 7.5;
+      this.vy = Math.sin(angle) * 7.5;
+      this.radius = 8;
+      this.damage = damage;
+      this.isCrit = isCrit;
+      this.spellType = spellType;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.spellType === 'fire' ? '#ed8936' : '#63b3ed';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      for (let e of enemies) {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= this.radius + e.radius) {
+          e.takeDamage(this.damage, this.isCrit);
+
+          if (player.hasMageShield) {
+            player.hp = Math.min(player.maxHp, player.hp + (this.damage * 0.2));
+            updateHUD();
+          }
+
+          if (this.spellType === 'fire') {
+            const aoe = player.hasMageMeteor ? 65 : 40;
+            explosions.push({ x: this.x, y: this.y, maxRadius: aoe, life: 12 });
+            enemies.forEach(ne => {
+              if (Math.hypot(ne.x - this.x, ne.y - this.y) <= aoe + ne.radius) {
+                ne.applyBurn(this.damage * (player.hasMageBurn ? 0.6 : 0.4));
+              }
+            });
+          } else if (this.spellType === 'ice') {
+            e.applyFreeze(player.hasMageFrostbite ? 90 : 60);
+          }
+
+          return false;
+        }
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
+  class NecroEssence {
+    constructor(x, y, angle, damage, isCrit, pierce) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * 8.0;
+      this.vy = Math.sin(angle) * 8.0;
+      this.radius = 7;
+      this.damage = damage;
+      this.isCrit = isCrit;
+      this.pierce = pierce;
+      this.hitEnemies = new Set();
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#48bb78';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#9ae6b4';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      for (let e of enemies) {
+        if (this.hitEnemies.has(e)) continue;
+
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= this.radius + e.radius) {
+          e.necroInfected = true;
+          e.takeDamage(this.damage, this.isCrit);
+          this.hitEnemies.add(e);
+
+          this.pierce--;
+          if (this.pierce <= 0) return false;
+        }
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
+  class AllyZombie {
+    constructor(x, y, isGolem) {
+      this.x = x;
+      this.y = y;
+      this.isGolem = isGolem || false;
+      this.radius = this.isGolem ? 22 : 15;
+      this.hp = this.isGolem ? 350 : 120;
+      this.maxHp = this.hp;
+      this.speed = player.hasNecroHorde ? 2.5 : 1.8;
+      this.damage = 18 * (player.hasNecroHorde ? 1.4 : 1.0) * (this.isGolem ? 1.8 : 1.0);
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.isGolem ? '#276749' : '#2f855a';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#9ae6b4';
+      ctx.stroke();
+
+      const barW = this.radius * 2;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 8, barW, 4);
+      ctx.fillStyle = '#48bb78';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 8, (this.hp / this.maxHp) * barW, 4);
+    }
+
+    update() {
+      if (player.hasNecroCurse) {
+        enemies.forEach(e => {
+          if (Math.hypot(e.x - this.x, e.y - this.y) < 120) {
+            e.takeDamage(0.3, false);
+          }
+        });
+      }
+
+      if (enemies.length === 0) return true;
+
+      let closest = null;
+      let minDist = Infinity;
+      enemies.forEach(e => {
+        const d = Math.hypot(e.x - this.x, e.y - this.y);
+        if (d < minDist) {
+          minDist = d;
+          closest = e;
+        }
+      });
+
+      if (!closest) return true;
+
+      const angle = Math.atan2(closest.y - this.y, closest.x - this.x);
+      this.x += Math.cos(angle) * this.speed;
+      this.y += Math.sin(angle) * this.speed;
+
+      if (minDist <= this.radius + closest.radius) {
+        closest.takeDamage(this.damage * 0.05, false);
+        this.hp -= 0.5;
+
+        if (player.hasNecroHarvest && Math.random() < 0.1) {
+          player.hp = Math.min(player.maxHp, player.hp + 1);
+          updateHUD();
+        }
+      }
+
+      return this.hp > 0;
+    }
+  }
+
+  class AllyGhost {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.radius = 14;
+      this.maxShards = player.hasNecroHaunt ? 3 : 2;
+      this.shardsFired = 0;
+      this.shootTimer = 20;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(154, 230, 180, 0.65)';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      if (enemies.length === 0) return false;
+
+      this.shootTimer--;
+      if (this.shootTimer <= 0 && this.shardsFired < this.maxShards) {
+        let closest = null;
+        let minDist = Infinity;
+        enemies.forEach(e => {
+          const d = Math.hypot(e.x - this.x, e.y - this.y);
+          if (d < minDist) {
+            minDist = d;
+            closest = e;
+          }
+        });
+
+        if (closest) {
+          const angle = Math.atan2(closest.y - this.y, closest.x - this.x);
+          minionProjectiles.push(new GhoulShard(this.x, this.y, angle));
+          this.shardsFired++;
+          this.shootTimer = 25;
+        }
+      }
+
+      return this.shardsFired < this.maxShards;
+    }
+  }
+
+  class GhoulShard {
+    constructor(x, y, angle) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * 7.0;
+      this.vy = Math.sin(angle) * 7.0;
+      this.radius = 5;
+      this.damage = 25;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#68d391';
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      for (let e of enemies) {
+        const dist = Math.hypot(e.x - this.x, e.y - this.y);
+        if (dist <= this.radius + e.radius) {
+          e.takeDamage(this.damage, false);
+          if (player.hasNecroHarvest) {
+            player.hp = Math.min(player.maxHp, player.hp + 1);
+            updateHUD();
+          }
+          return false;
+        }
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
+  class Enemy {
+    constructor(x, y, type, floor) {
+      this.x = x;
+      this.y = y;
+      this.type = type;
+
+      let diffMult = 1.0;
+      if (difficulty === 'easy') diffMult = 0.75;
+      if (difficulty === 'hard') diffMult = 1.35;
+
+      const scale = (1 + (floor - 1) * 0.22) * diffMult;
+
+      this.burnTimer = 0;
+      this.burnDmg = 0;
+      this.freezeTimer = 0;
+      this.necroInfected = false;
+
+      if (type === 'slime') {
+        this.radius = 14;
+        this.hp = 24 * scale;
+        this.maxHp = this.hp;
+        this.speed = 1.5;
+        this.damage = 8 * scale;
+        this.color = '#48bb78';
+        this.goldReward = 8;
+        this.xpReward = 12;
+        this.leapTimer = 120;
+      } else if (type === 'ranger') {
+        this.radius = 15;
+        this.hp = 40 * scale;
+        this.maxHp = this.hp;
+        this.speed = 1.3;
+        this.damage = 10 * scale;
+        this.color = '#ed8936';
+        this.goldReward = 15;
+        this.xpReward = 20;
+        this.shootTimer = 90;
+      } else if (type === 'goblin_charger') {
+        this.radius = 16;
+        this.hp = 55 * scale;
+        this.maxHp = this.hp;
+        this.speed = 2.4;
+        this.damage = 14 * scale;
+        this.color = '#e53e3e';
+        this.goldReward = 20;
+        this.xpReward = 25;
+      } else if (type === 'boss_golem') {
+        this.radius = 42;
+        this.hp = 450 * scale;
+        this.maxHp = this.hp;
+        this.speed = 0.85;
+        this.damage = 22 * scale;
+        this.color = '#9f7aea';
+        this.goldReward = 180;
+        this.xpReward = 200;
+        this.slamTimer = 180;
+      } else if (type === 'boss_inferno') {
+        this.radius = 40;
+        this.hp = 700 * scale;
+        this.maxHp = this.hp;
+        this.speed = 1.1;
+        this.damage = 26 * scale;
+        this.color = '#dd6b20';
+        this.goldReward = 300;
+        this.xpReward = 350;
+        this.novaTimer = 140;
+      } else if (type === 'boss_kraken') {
+        this.radius = 45;
+        this.hp = 1100 * scale;
+        this.maxHp = this.hp;
+        this.speed = 0.7;
+        this.damage = 32 * scale;
+        this.color = '#2b6cb0';
+        this.goldReward = 500;
+        this.xpReward = 600;
+        this.tentacleTimer = 110;
+      } else if (type === 'sans_boss') {
+        this.radius = 28;
+        this.hp = 1800 * scale;
+        this.maxHp = this.hp;
+        this.speed = 1.8;
+        this.damage = 16 * scale;
+        this.color = '#e2e8f0';
+        this.goldReward = 1000;
+        this.xpReward = 1200;
+        this.phaseTimer = 0;
+        this.attackCycle = 0;
+      }
+    }
+
+    applyBurn(dmg) {
+      this.burnTimer = 90;
+      this.burnDmg = dmg;
+    }
+
+    applyFreeze(duration) {
+      this.freezeTimer = duration;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.freezeTimer > 0 ? '#63b3ed' : (this.burnTimer > 0 ? '#ed8936' : this.color);
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = this.necroInfected ? '#48bb78' : '#000000';
+      ctx.stroke();
+
+      if (this.type === 'sans_boss') {
+        ctx.fillStyle = '#3182ce';
+        ctx.beginPath();
+        ctx.arc(this.x - 6, this.y - 4, 4, 0, Math.PI * 2);
+        ctx.arc(this.x + 6, this.y - 4, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const barW = this.radius * 2.2;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 12, barW, 6);
+      ctx.fillStyle = this.type === 'sans_boss' ? '#4299e1' : '#e53e3e';
+      ctx.fillRect(this.x - barW / 2, this.y - this.radius - 12, (this.hp / this.maxHp) * barW, 6);
+    }
+
+    update() {
+      if (this.burnTimer > 0) {
+        this.burnTimer--;
+        if (this.burnTimer % 15 === 0) {
+          this.takeDamage(this.burnDmg, false);
+        }
+      }
+
+      if (this.freezeTimer > 0) {
+        this.freezeTimer--;
+        return;
+      }
+
+      const angle = Math.atan2(player.y - this.y, player.x - this.x);
+      const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
+
+      if (this.type === 'slime') {
+        this.leapTimer--;
+        if (this.leapTimer <= 0) {
+          this.x += Math.cos(angle) * 80;
+          this.y += Math.sin(angle) * 80;
+          this.leapTimer = 140;
+        } else {
+          this.x += Math.cos(angle) * this.speed;
+          this.y += Math.sin(angle) * this.speed;
+        }
+      } else if (this.type === 'ranger') {
+        if (distToPlayer < 190) {
+          this.x -= Math.cos(angle) * (this.speed * 0.7);
+          this.y -= Math.sin(angle) * (this.speed * 0.7);
+        } else {
+          this.x += Math.cos(angle) * (this.speed * 0.4);
+          this.y += Math.sin(angle) * (this.speed * 0.4);
+        }
+
+        this.shootTimer--;
+        if (this.shootTimer <= 0) {
+          [-0.2, 0, 0.2].forEach(off => {
+            enemyProjectiles.push(new EnemyOrb(this.x, this.y, angle + off, 4.2, this.damage, '#ed8936', 5));
+          });
+          this.shootTimer = 110;
+        }
+      } else if (this.type === 'goblin_charger') {
+        this.x += Math.cos(angle) * this.speed;
+        this.y += Math.sin(angle) * this.speed;
+      } else if (this.type === 'boss_golem') {
+        this.x += Math.cos(angle) * this.speed;
+        this.y += Math.sin(angle) * this.speed;
+
+        this.slamTimer--;
+        if (this.slamTimer <= 0) {
+          shockwaves.push(new ShockwaveRing(this.x, this.y, this.damage * 1.2));
+          this.slamTimer = 160;
+        }
+      } else if (this.type === 'boss_inferno') {
+        this.x += Math.cos(angle) * this.speed;
+        this.y += Math.sin(angle) * this.speed;
+
+        this.novaTimer--;
+        if (this.novaTimer <= 0) {
+          for (let i = 0; i < 10; i++) {
+            const a = (Math.PI * 2 / 10) * i;
+            enemyProjectiles.push(new EnemyOrb(this.x, this.y, a, 4.8, this.damage * 0.8, '#dd6b20', 7));
+          }
+          this.novaTimer = 130;
+        }
+      } else if (this.type === 'boss_kraken') {
+        this.x += Math.cos(angle) * this.speed;
+        this.y += Math.sin(angle) * this.speed;
+
+        this.tentacleTimer--;
+        if (this.tentacleTimer <= 0) {
+          shockwaves.push(new ShockwaveRing(player.x, player.y, this.damage * 1.1));
+          this.tentacleTimer = 100;
+        }
+      } else if (this.type === 'sans_boss') {
+        this.x += Math.cos(angle) * (this.speed * 0.5);
+        this.y += Math.sin(angle) * (this.speed * 0.5);
+
+        this.phaseTimer++;
+        if (this.phaseTimer % 120 === 0) {
+          this.executeSansAttack(angle);
+        }
+      }
+
+      if (distToPlayer <= player.radius + this.radius) {
+        player.takeDamage(this.damage * 0.035);
+      }
+    }
+
+    executeSansAttack(angle) {
+      this.attackCycle = (this.attackCycle + 1) % 3;
+
+      if (this.attackCycle === 0) {
+        const bx = player.x + (Math.random() * 200 - 100);
+        const by = player.y < 325 ? 80 : 570;
+        const beamAngle = Math.atan2(player.y - by, player.x - bx);
+        gasterBlasters.push(new GasterBlaster(bx, by, beamAngle, this.damage * 2.2));
+      } else if (this.attackCycle === 1) {
+        const gapY = 100 + Math.random() * 450;
+        for (let y = 30; y < canvas.height - 30; y += 22) {
+          if (Math.abs(y - gapY) > 55) {
+            boneWalls.push(new BoneWall(canvas.width, y, -4.5, this.damage * 0.8));
+          }
+        }
+      } else if (this.attackCycle === 2) {
+        this.x = 100 + Math.random() * 700;
+        this.y = 100 + Math.random() * 450;
+        for (let i = 0; i < 12; i++) {
+          const a = (Math.PI * 2 / 12) * i;
+          enemyProjectiles.push(new EnemyOrb(this.x, this.y, a, 4.5, this.damage * 0.7, '#4299e1', 7));
+        }
+      }
+    }
+
+    takeDamage(amount, isCrit) {
+      if (this.type === 'sans_boss' && Math.random() < 0.25) {
+        this.x = Math.max(50, Math.min(canvas.width - 50, this.x + (Math.random() * 200 - 100)));
+        this.y = Math.max(50, Math.min(canvas.height - 50, this.y + (Math.random() * 200 - 100)));
+        damageNumbers.push(new DamageNumber(this.x, this.y - 15, 'MISS!', '#63b3ed'));
+        return;
+      }
+      this.hp -= amount;
+      damageNumbers.push(new DamageNumber(this.x, this.y - 10, Math.round(amount), isCrit ? '#f6e05e' : '#ffffff'));
+
+      if (this.hp <= 0) {
+        if (this.type === 'boss_golem') persistentData.unlockedAssists.golem = true;
+        if (this.type === 'boss_inferno') persistentData.unlockedAssists.inferno = true;
+        if (this.type === 'boss_kraken') persistentData.unlockedAssists.kraken = true;
+        if (this.type === 'sans_boss') persistentData.unlockedAssists.sans = true;
+        saveGameData();
+        updateAssistHUD();
+
+        if (this.necroInfected && this.type !== 'sans_boss') {
+          if (player.hasNecroGolem) {
+            allyMinions.push(new AllyZombie(this.x, this.y, true));
+          } else if (Math.random() < 0.5) {
+            allyMinions.push(new AllyZombie(this.x, this.y, false));
+          } else {
+            allyMinions.push(new AllyGhost(this.x, this.y));
+          }
+        }
+      }
+    }
+  }
+
+  function useAssist(type) {
+    if (!persistentData.unlockedAssists[type] || (assistCooldowns[type].current > 0 && !noCooldowns) || isGamePaused) return;
+
+    assistCooldowns[type].current = assistCooldowns[type].max;
+
+    if (type === 'golem') {
+      player.hp = Math.min(player.maxHp, player.hp + 60);
+      shockwaves.push(new ShockwaveRing(player.x, player.y, 100));
+      damageNumbers.push(new DamageNumber(player.x, player.y - 25, 'GOLEM SHIELD!', '#9f7aea'));
+    } else if (type === 'inferno') {
+      for (let i = 0; i < 18; i++) {
+        const a = (Math.PI * 2 / 18) * i;
+        playerProjectiles.push(new MageOrb(player.x, player.y, a, 80, true, 'fire'));
+      }
+      damageNumbers.push(new DamageNumber(player.x, player.y - 25, 'INFERNO NOVA!', '#dd6b20'));
+    } else if (type === 'kraken') {
+      enemies.forEach(e => {
+        e.takeDamage(120, true);
+        e.applyFreeze(120);
+      });
+      damageNumbers.push(new DamageNumber(player.x, player.y - 25, 'KRAKEN SURGE!', '#2b6cb0'));
+    } else if (type === 'sans') {
+      gasterBlasters.push(new GasterBlaster(100, 80, Math.atan2(player.y - 80, player.x - 100), 250));
+      gasterBlasters.push(new GasterBlaster(800, 80, Math.atan2(player.y - 80, player.x - 800), 250));
+      damageNumbers.push(new DamageNumber(player.x, player.y - 25, 'BONEY ASSIST!', '#ecc94b'));
+    }
+    updateHUD();
+  }
+
+  function updateAssistHUD() {
+    ['golem', 'inferno', 'kraken', 'sans'].forEach(type => {
+      const btn = document.getElementById(`btn-assist-${type}`);
+      if (persistentData.unlockedAssists[type]) {
+        btn.style.display = 'flex';
+        btn.disabled = assistCooldowns[type].current > 0 && !noCooldowns;
+      } else {
+        btn.style.display = 'none';
+      }
+    });
+  }
+
+  class GasterBlaster {
+    constructor(x, y, angle, damage) {
+      this.x = x;
+      this.y = y;
+      this.angle = angle;
+      this.damage = damage;
+      this.chargeTimer = 45;
+      this.beamDuration = 20;
+      this.width = 45;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.fillRect(-6, -6, 4, 8);
+      ctx.fillRect(2, -6, 4, 8);
+
+      if (this.chargeTimer > 0) {
+        ctx.strokeStyle = 'rgba(229, 62, 62, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(1000, 0);
+        ctx.stroke();
+      } else if (this.beamDuration > 0) {
+        ctx.fillStyle = '#63b3ed';
+        ctx.fillRect(0, -this.width / 2, 1000, this.width);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, -this.width / 4, 1000, this.width / 2);
+      }
+
+      ctx.restore();
+    }
+
+    update() {
+      if (this.chargeTimer > 0) {
+        this.chargeTimer--;
+        return true;
+      }
+
+      if (this.beamDuration > 0) {
+        this.beamDuration--;
+
+        const cos = Math.cos(this.angle);
+        const sin = Math.sin(this.angle);
+        const px = player.x - this.x;
+        const py = player.y - this.y;
+        const proj = px * cos + py * sin;
+        const perp = -px * sin + py * cos;
+
+        if (proj > 0 && Math.abs(perp) < this.width / 2 + player.radius) {
+          player.takeDamage(this.damage * 0.15);
+        }
+
+        enemies.forEach(e => {
+          const ex = e.x - this.x;
+          const ey = e.y - this.y;
+          const eproj = ex * cos + ey * sin;
+          const eperp = -ex * sin + ey * cos;
+          if (eproj > 0 && Math.abs(eperp) < this.width / 2 + e.radius) {
+            e.takeDamage(this.damage * 0.1, false);
+          }
+        });
+
+        return this.beamDuration > 0;
+      }
+
+      return false;
+    }
+  }
+
+  class BoneWall {
+    constructor(x, y, vx, damage) {
+      this.x = x;
+      this.y = y;
+      this.vx = vx;
+      this.damage = damage;
+      this.width = 10;
+      this.height = 18;
+    }
+
+    draw() {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y - this.height / 2, 6, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y + this.height / 2, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    update() {
+      this.x += this.vx;
+
+      if (Math.abs(player.x - this.x) < this.width / 2 + player.radius &&
+          Math.abs(player.y - this.y) < this.height / 2 + player.radius) {
+        player.takeDamage(this.damage);
+        return false;
+      }
+
+      return this.x > -20;
+    }
+  }
+
+  class ShockwaveRing {
+    constructor(x, y, damage) {
+      this.x = x;
+      this.y = y;
+      this.radius = 10;
+      this.maxRadius = 180;
+      this.damage = damage;
+      this.hasHit = false;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(159, 122, 234, 0.7)';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    update() {
+      this.radius += 4;
+
+      if (!this.hasHit) {
+        const dist = Math.hypot(player.x - this.x, player.y - this.y);
+        if (Math.abs(dist - this.radius) < player.radius + 6) {
+          player.takeDamage(this.damage);
+          this.hasHit = true;
+        }
+      }
+
+      return this.radius < this.maxRadius;
+    }
+  }
+
+  class EnemyOrb {
+    constructor(x, y, angle, speed, damage, color, radius) {
+      this.x = x;
+      this.y = y;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.radius = radius;
+      this.damage = damage;
+      this.color = color;
+    }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      const dist = Math.hypot(player.x - this.x, player.y - this.y);
+      if (dist <= this.radius + player.radius) {
+        player.takeDamage(this.damage);
+        return false;
+      }
+
+      return !(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height);
+    }
+  }
+
+  class DamageNumber {
+    constructor(x, y, text, color) {
+      this.x = x + (Math.random() * 20 - 10);
+      this.y = y;
+      this.text = text;
+      this.color = color;
+      this.opacity = 1.0;
+      this.life = 30;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.opacity;
+      ctx.fillStyle = this.color;
+      ctx.font = 'bold 14px Segoe UI';
+      ctx.fillText(this.text, this.x, this.y);
+      ctx.restore();
+    }
+
+    update() {
+      this.y -= 0.8;
+      this.life--;
+      this.opacity = this.life / 30;
+      return this.life > 0;
+    }
+  }
+
+  let enemies = [];
+  let playerProjectiles = [];
+  let enemyProjectiles = [];
+  let allyMinions = [];
+  let minionProjectiles = [];
+  let damageNumbers = [];
+  let slashVisuals = [];
+  let explosions = [];
+  let gasterBlasters = [];
+  let boneWalls = [];
+  let shockwaves = [];
+
+  function setDifficulty(diff) {
+    difficulty = diff;
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('lbl-mode-tag').innerText = `(${diff.charAt(0).toUpperCase() + diff.slice(1)})`;
+  }
+
+  function selectWeapon(type) {
+    selectedWeapon = type;
+    document.getElementById('card-sword').classList.toggle('selected', type === 'sword');
+    document.getElementById('card-projectile').classList.toggle('selected', type === 'projectile');
+    document.getElementById('card-mage').classList.toggle('selected', type === 'mage');
+    document.getElementById('card-necro').classList.toggle('selected', type === 'necro');
+  }
+
+  function buyPerk(perkKey) {
+    let cost = 0;
+    let lvlKey = '';
+
+    if (perkKey === 'hp') { cost = 50; lvlKey = 'perkHp'; }
+    if (perkKey === 'dmg') { cost = 75; lvlKey = 'perkDmg'; }
+    if (perkKey === 'spd') { cost = 60; lvlKey = 'perkSpd'; }
+
+    if (persistentData[lvlKey] < 5 && persistentData.bankGold >= cost) {
+      persistentData.bankGold -= cost;
+      persistentData[lvlKey]++;
+      saveGameData();
+      updateShopUI();
+    }
+  }
+
+  function updateShopUI() {
+    document.getElementById('shop-bank-gold').innerText = persistentData.bankGold;
+    document.getElementById('lbl-bank-gold').innerText = persistentData.bankGold;
+
+    document.getElementById('perk-hp-level').innerText = `Lvl: ${persistentData.perkHp} / 5`;
+    document.getElementById('perk-dmg-level').innerText = `Lvl: ${persistentData.perkDmg} / 5`;
+    document.getElementById('perk-spd-level').innerText = `Lvl: ${persistentData.perkSpd} / 5`;
+
+    document.getElementById('btn-buy-hp').disabled = persistentData.perkHp >= 5 || persistentData.bankGold < 50;
+    document.getElementById('btn-buy-dmg').disabled = persistentData.perkDmg >= 5 || persistentData.bankGold < 75;
+    document.getElementById('btn-buy-spd').disabled = persistentData.perkSpd >= 5 || persistentData.bankGold < 60;
+  }
+
+  function spawnFloorEnemies() {
+    enemies = [];
+    playerProjectiles = [];
+    enemyProjectiles = [];
+    allyMinions = [];
+    minionProjectiles = [];
+    gasterBlasters = [];
+    boneWalls = [];
+    shockwaves = [];
+
+    const isSansFloor = player.floor % 100 === 0;
+
+    if (isSansFloor) {
+      enemies.push(new Enemy(700, 325, 'sans_boss', player.floor));
+    } else if (player.floor % 25 === 0) {
+      enemies.push(new Enemy(700, 325, 'boss_golem', player.floor));
+    } else if (player.floor % 50 === 0) {
+      enemies.push(new Enemy(700, 325, 'boss_inferno', player.floor));
+    } else if (player.floor % 75 === 0) {
+      enemies.push(new Enemy(700, 325, 'boss_kraken', player.floor));
+    } else {
+      const count = 3 + Math.floor(player.floor * 1.5);
+      for (let i = 0; i < count; i++) {
+        const rand = Math.random();
+        let type = 'slime';
+        if (rand > 0.6) type = 'ranger';
+        else if (rand > 0.35) type = 'goblin_charger';
+
+        const rx = 520 + Math.random() * 330;
+        const ry = 60 + Math.random() * 520;
+        enemies.push(new Enemy(rx, ry, type, player.floor));
+      }
+    }
+  }
+
+  function startGame() {
+    player.weaponType = selectedWeapon;
+
+    const baseHp = 100 + (persistentData.perkHp * 20);
+    player.maxHp = baseHp;
+    player.hp = baseHp;
+
+    const dmgBonus = 1.0 + (persistentData.perkDmg * 0.1);
+    player.damageMult = dmgBonus;
+
+    player.speed = 3.8 + (persistentData.perkSpd * 0.2);
+
+    if (selectedWeapon === 'sword') {
+      player.attackMaxCooldown = 28;
+      player.baseDamage = 22;
+      document.getElementById('lbl-weapon-type').innerText = 'Warrior Blade';
+    } else if (selectedWeapon === 'projectile') {
+      player.attackMaxCooldown = 32;
+      player.baseDamage = 13;
+      document.getElementById('lbl-weapon-type').innerText = 'Ranger Bow';
+    } else if (selectedWeapon === 'mage') {
+      player.attackMaxCooldown = 30;
+      player.baseDamage = 16;
+      document.getElementById('lbl-weapon-type').innerText = 'Elemental Mage';
+    } else if (selectedWeapon === 'necro') {
+      player.attackMaxCooldown = 26;
+      player.baseDamage = 14;
+      document.getElementById('lbl-weapon-type').innerText = 'Necromancer';
+    }
+
+    document.getElementById('starter-modal').classList.remove('active');
+    isGamePaused = false;
+    gameStarted = true;
+    spawnFloorEnemies();
+    updateHUD();
+    updateAssistHUD();
+  }
+
+  function presentUpgradeChoices() {
+    isGamePaused = true;
+
+    const isSansNext = (player.floor + 1) % 100 === 0;
+    const subTitle = document.getElementById('upgrade-subtitle');
+    if (isSansNext) {
+      subTitle.innerText = "WARNING: SANS GOD-BOSS AWAITING ON FLOOR " + (player.floor + 1) + "! PREPARE YOUR DODGES!";
+    } else if ((player.floor + 1) % 25 === 0) {
+      subTitle.innerText = "Unique Boss ahead on Floor " + (player.floor + 1) + "! Defeat it to unlock its Assist!";
+    } else {
+      subTitle.innerText = "Choose 1 perk or weapon upgrade to advance to Floor " + (player.floor + 1);
+    }
+
+    const available = Object.values(UPGRADE_POOL).filter(u => {
+      return u.weapon === 'any' || u.weapon === player.weaponType;
+    });
+
+    const shuffled = available.sort(() => 0.5 - Math.random()).slice(0, 3);
+    const container = document.getElementById('card-container');
+    container.innerHTML = '';
+
+    shuffled.forEach(upgrade => {
+      const card = document.createElement('div');
+      card.className = 'upgrade-card';
+      card.innerHTML = `
+        <div class="card-icon">${upgrade.icon}</div>
+        <div class="card-title">${upgrade.title}</div>
+        <div class="card-desc">${upgrade.desc}</div>
+        <button class="card-btn">Select Perk</button>
+      `;
+
+      card.onclick = () => applyUpgradeChoice(upgrade.id);
+      container.appendChild(card);
+    });
+
+    document.getElementById('upgrade-modal').classList.add('active');
+  }
+
+  function applyUpgradeChoice(upgradeId) {
+    switch (upgradeId) {
+      case 'sword_range': player.swordRangeMult += 0.25; break;
+      case 'sword_double': player.hasDoubleSlash = true; break;
+      case 'sword_whirlwind': player.hasWhirlwind = true; break;
+      case 'sword_lifesteal': player.hasLifesteal = true; break;
+      case 'sword_speed': player.attackMaxCooldown = Math.max(10, Math.floor(player.attackMaxCooldown * 0.75)); break;
+      case 'sword_heavy': player.hasSwordHeavy = true; break;
+      case 'sword_parry': player.hasSwordParry = true; break;
+
+      case 'proj_multishot': player.extraProjectiles += 1; break;
+      case 'proj_pierce': player.projPierce += 1; break;
+      case 'proj_ricochet': player.hasRicochet = true; break;
+      case 'proj_explosive': player.hasExplosive = true; break;
+      case 'proj_speed': player.attackMaxCooldown = Math.max(12, Math.floor(player.attackMaxCooldown * 0.8)); break;
+      case 'proj_homing': player.hasProjHoming = true; break;
+      case 'proj_sniper': player.hasProjSniper = true; break;
+
+      case 'mage_meteor': player.hasMageMeteor = true; break;
+      case 'mage_frostbite': player.hasMageFrostbite = true; break;
+      case 'mage_dual': player.hasMageDual = true; break;
+      case 'mage_burn': player.hasMageBurn = true; break;
+      case 'mage_lightning': player.hasMageLightning = true; break;
+      case 'mage_shield': player.hasMageShield = true; break;
+
+      case 'necro_horde': player.hasNecroHorde = true; break;
+      case 'necro_haunt': player.hasNecroHaunt = true; break;
+      case 'necro_plague': player.hasNecroPlague = true; break;
+      case 'necro_harvest': player.hasNecroHarvest = true; break;
+      case 'necro_golem': player.hasNecroGolem = true; break;
+      case 'necro_curse': player.hasNecroCurse = true; break;
+
+      case 'gen_hp': player.maxHp += 30; player.hp = player.maxHp; break;
+      case 'gen_regen': player.regenRate += 2.0; break;
+      case 'gen_dmg': player.damageMult += 0.15; break;
+      case 'gen_crit': player.critChance += 0.12; break;
+      case 'gen_speed': player.speed += 0.4; break;
+    }
+
+    document.getElementById('upgrade-modal').classList.remove('active');
+
+    player.floor++;
+    player.x = 100;
+    player.y = 325;
+    spawnFloorEnemies();
+    updateHUD();
+    isGamePaused = false;
+  }
+
+  function triggerGameOver() {
+    isGamePaused = true;
+    document.getElementById('gameover-stats').innerText = `You reached Floor ${player.floor} and earned ${player.gold} Gold!`;
+    document.getElementById('gameover-modal').classList.add('active');
+  }
+
+  function restartGame() {
+    document.getElementById('gameover-modal').classList.remove('active');
+
+    player.hp = 100;
+    player.maxHp = 100;
+    player.level = 1;
+    player.xp = 0;
+    player.xpNeeded = 50;
+    player.gold = 0;
+    player.floor = 1;
+    player.regenRate = 0;
+    player.damageMult = 1.0;
+    player.critChance = 0.05;
+    player.speed = 3.8;
+    player.swordRangeMult = 1.0;
+    player.hasDoubleSlash = false;
+    player.hasWhirlwind = false;
+    player.hasLifesteal = false;
+    player.hasSwordHeavy = false;
+    player.hasSwordParry = false;
+    player.extraProjectiles = 1;
+    player.projPierce = 1;
+    player.hasRicochet = false;
+    player.hasExplosive = false;
+    player.hasProjHoming = false;
+    player.hasProjSniper = false;
+    player.hasMageMeteor = false;
+    player.hasMageFrostbite = false;
+    player.hasMageDual = false;
+    player.hasMageBurn = false;
+    player.hasMageLightning = false;
+    player.hasMageShield = false;
+    player.hasNecroHorde = false;
+    player.hasNecroHaunt = false;
+    player.hasNecroPlague = false;
+    player.hasNecroHarvest = false;
+    player.hasNecroGolem = false;
+    player.hasNecroCurse = false;
+
+    updateShopUI();
+    document.getElementById('starter-modal').classList.add('active');
+  }
+
+  function updateHUD() {
+    document.getElementById('lbl-level').innerText = player.level;
+    document.getElementById('lbl-gold').innerText = player.gold;
+    document.getElementById('lbl-bank-gold').innerText = persistentData.bankGold;
+    document.getElementById('lbl-floor').innerText = player.floor;
+
+    document.getElementById('hp-bar').style.width = Math.max(0, (player.hp / player.maxHp) * 100) + '%';
+    document.getElementById('hp-text').innerText = `${Math.ceil(player.hp)} / ${player.maxHp} HP`;
+
+    document.getElementById('xp-bar').style.width = Math.min(100, (player.xp / player.xpNeeded) * 100) + '%';
+    document.getElementById('xp-text').innerText = `${player.xp} / ${player.xpNeeded} XP`;
+  }
+
+  function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (gameStarted && !isGamePaused) {
+      player.update();
+
+      ['golem', 'inferno', 'kraken', 'sans'].forEach(type => {
+        if (assistCooldowns[type].current > 0 && !noCooldowns) {
+          assistCooldowns[type].current--;
+          const pct = (assistCooldowns[type].current / assistCooldowns[type].max) * 100;
+          document.getElementById(`cd-${type}`).style.height = `${pct}%`;
+          if (assistCooldowns[type].current === 0) {
+            updateAssistHUD();
+          }
+        }
+      });
+
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        e.update();
+        if (e.hp <= 0) {
+          player.gainRewards(e.xpReward, e.goldReward);
+          enemies.splice(i, 1);
+        }
+      }
+
+      if (enemies.length === 0) {
+        presentUpgradeChoices();
+      }
+
+      playerProjectiles = playerProjectiles.filter(p => p.update());
+      enemyProjectiles = enemyProjectiles.filter(p => p.update());
+      allyMinions = allyMinions.filter(m => m.update());
+      minionProjectiles = minionProjectiles.filter(mp => mp.update());
+      gasterBlasters = gasterBlasters.filter(gb => gb.update());
+      boneWalls = boneWalls.filter(bw => bw.update());
+      shockwaves = shockwaves.filter(sw => sw.update());
+
+      damageNumbers = damageNumbers.filter(d => d.update());
+
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        explosions[i].life--;
+        if (explosions[i].life <= 0) explosions.splice(i, 1);
+      }
+      for (let i = slashVisuals.length - 1; i >= 0; i--) {
+        slashVisuals[i].duration--;
+        if (slashVisuals[i].duration <= 0) slashVisuals.splice(i, 1);
+      }
+    }
+
+    player.draw();
+    enemies.forEach(e => e.draw());
+    allyMinions.forEach(m => m.draw());
+    playerProjectiles.forEach(p => p.draw());
+    enemyProjectiles.forEach(p => p.draw());
+    minionProjectiles.forEach(mp => mp.draw());
+    boneWalls.forEach(bw => bw.draw());
+    gasterBlasters.forEach(gb => gb.draw());
+    shockwaves.forEach(sw => sw.draw());
+    damageNumbers.forEach(d => d.draw());
+
+    explosions.forEach(ex => {
+      ctx.beginPath();
+      ctx.arc(ex.x, ex.y, ex.maxRadius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(237, 137, 54, 0.35)';
+      ctx.fill();
+    });
+
+    slashVisuals.forEach(sv => {
+      ctx.save();
+      ctx.beginPath();
+      if (sv.isWhirlwind) {
+        ctx.arc(sv.x, sv.y, sv.radius, 0, Math.PI * 2);
+      } else {
+        ctx.arc(sv.x, sv.y, sv.radius, sv.angle - Math.PI / 3.5, sv.angle + Math.PI / 3.5);
+      }
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#ecc94b';
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  loadSave();
+  gameLoop();
+</script>
 </body>
 </html>
